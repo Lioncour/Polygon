@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "RandomMeshMain.h"
 #include "Common\DirectXHelper.h"
+#include "Mesh.h"
 
 using namespace RandomMesh;
 using namespace Windows::Foundation;
@@ -11,6 +12,8 @@ using namespace Concurrency;
 RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
 {
+	auto mesh = new RandomMesh::Mesh(10);
+
 	// Register to be notified if the Device is lost or recreated
 	m_deviceResources->RegisterDeviceNotify(this);
 
