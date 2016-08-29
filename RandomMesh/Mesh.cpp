@@ -95,14 +95,10 @@ namespace RandomMesh
 		//randomizeVertexes(vertexAngles);
 	}
 
-	void Mesh::Delaunay(vector<VertexDummy>& seq)
+	void Mesh::Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges)
 	{
-		vector<XMFLOAT3> vertexes;
 		vector<Tetrahedron> tetras;
-
 		vector<Line> edges;
-		vector<Line> surfaceEdges;
-		vector<Triangle> triangles;
 
 		XMFLOAT3 vMax(-999, -999, -999);
 		XMFLOAT3 vMin(999, 999, 999);
@@ -193,18 +189,18 @@ namespace RandomMesh
 			newTList.clear();
 			removeTList.clear();
 
-			for (Tetrahedron t : tetras)
+			for(size_t index = tetras.size(); index > 0; index--)
 			{
+				auto t = tetras[index - 1];
 				if (t.isCorrect && t.r > Distance(v.Position, t.o))
 				{
+					tetras.erase(tetras.begin() + (index - 1));
 					tmpTList.push_back(t);
 				}
 			}
 
 			for (Tetrahedron t1 : tmpTList)
 			{
-				tetras.erase(std::remove(begin(tetras), end(tetras), t1), end(tetras));
-
 				v1 = t1.vertexes[0];
 				v2 = t1.vertexes[1];
 				v3 = t1.vertexes[2];
@@ -239,12 +235,10 @@ namespace RandomMesh
 			}
 		}
 
-		bool isOuter = false;
-		for(auto index = 0; index < tetras.size(); index++)
+		for(auto index = tetras.size(); index > 0; index--)
 		{
-			auto t4 = tetras[index];
-
-			isOuter = false;
+			auto t4 = tetras[index - 1];
+			auto isOuter = false;
 
 			for (XMFLOAT3 p1 : t4.vertexes)
 			{
@@ -265,17 +259,17 @@ namespace RandomMesh
 
 			if (isOuter)
 			{
-				tetras.erase(tetras.begin() + index);
+				tetras.erase(tetras.begin() + (index - 1));
 			}
 		}
 
 		triangles.clear();
-		bool isSame = false;
+
 		for (Tetrahedron t : tetras)
 		{
 			for (Line l1 : t.GetLines())
 			{
-				isSame = false;
+				auto isSame = false;
 				for (Line l2 : edges)
 				{
 					if (l2.Equals(l1))
@@ -384,7 +378,5 @@ namespace RandomMesh
 				surfaceEdges.push_back(surfaceEdgeList[i]);
 			}
 		}
-
-		auto a = 1;
 	}
 }
