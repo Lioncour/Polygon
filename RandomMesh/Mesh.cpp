@@ -54,17 +54,11 @@ namespace RandomMesh
 		auto vertexes = vector<VertexDummy>();
 		vertexes.reserve(vertexNum);
 
-		// I decided to use Delaunay triangularization for creating triangles from cloud of random points on a sphere - this ensures us that resulting figure makes sense 
-		//Delaunay d = new Delaunay();
-		//vertexes = new ArrayList<PVector>();
-		//float[][] vertexAngles = new float[vertexNum][2];
-		//	
-		//// here are created random points. They are laying on sphere. 
-		for (size_t i = 0; i < vertexNum; i++) {
-			// we add some small random number to radius in order to avoid computational bugs 
+		for (size_t i = 0; i < vertexNum; i++)
+		{
 			float r = 0.25;
-			float phi = DirectX::XMConvertToRadians(Random(-90, 90));
-			float theta = DirectX::XMConvertToRadians(Random(360));
+			float phi = XMConvertToRadians(Random(-90, 90));
+			float theta = XMConvertToRadians(Random(360));
 
 			vertexes.push_back(VertexDummy(r*cos(phi)*cos(theta), r*sin(phi), r*cos(phi)*sin(theta), phi, theta));
 		}
@@ -73,26 +67,112 @@ namespace RandomMesh
 
 		vertexes.push_back(VertexDummy(-0.5f, -0.5f, -0.5f, 0.0f, 0.0f));
 		vertexes.push_back(VertexDummy(-0.5f, -0.5f, 0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(-0.5f,  0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(-0.5f,  0.5f,  0.5f, 0.0f, 0.0f));
-		/*vertexes.push_back(VertexDummy(0.5f, -0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f, -0.5f,  0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f,  0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f,  0.5f,  0.5f, 0.0f, 0.0f));*/
+		vertexes.push_back(VertexDummy(-0.5f, 0.5f, -0.5f, 0.0f, 0.0f));
+		vertexes.push_back(VertexDummy(-0.5f, 0.5f, 0.5f, 0.0f, 0.0f));
+		vertexes.push_back(VertexDummy(0.5f, -0.5f, -0.5f, 0.0f, 0.0f));
+		vertexes.push_back(VertexDummy(0.5f, -0.5f, 0.5f, 0.0f, 0.0f));
+		vertexes.push_back(VertexDummy(0.5f, 0.5f, -0.5f, 0.0f, 0.0f));
+		vertexes.push_back(VertexDummy(0.5f, 0.5f, 0.5f, 0.0f, 0.0f));
 
-		Delaunay(vertexes);
+		vector<Triangle> triangles;
+		vector<Line> edges;
 
-		auto a = 1;
+		Delaunay(vertexes, triangles, edges);
 
-		//// here Delaunay triangularization take place 
-		//// I use external code to perform it
-		//d.SetData(vertexes);
+		auto triangleDummies = DoSmth(triangles, vertexes);
 
-		//// after creating list of points we map achieved triangles to saved points so each triangle vertex is saved by reference to each vertex rather than absolute position
-		//// this enables us quick movement of vertex without changes in triangles lists 
-		//mapTriangles(d);
-		//// than we randomize vertexes changing only the radius of each vertex. That way it's sure that resulting figure makes sense. 
-		//randomizeVertexes(vertexAngles);
+		RandomizeVertexes(vertexes);
+
+
+
+		for (auto triangle : triangleDummies)
+		{
+			VertexPositionColor c = { triangle.V1->Position, GetColor(triangle.V1->Position, ) };
+
+			_gradientVertexes.push_back(c);
+		}
+	}
+
+	vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes)
+	{
+		vector<TriangleDummy> result;
+		result.reserve(triangles.size());
+
+		for (auto triangle : triangles)
+		{
+			auto v1 = triangle.v1;
+			auto v2 = triangle.v2;
+			auto v3 = triangle.v3;
+
+			VertexDummy* vert1 = nullptr;
+			VertexDummy* vert2 = nullptr;
+			VertexDummy* vert3 = nullptr;
+
+			for (auto& vertex : vertexes)
+			{
+				if (vertex.Position == v1)
+				{
+					vert1 = &vertex;
+				}
+				else if (vertex.Position == v2)
+				{
+					vert2 = &vertex;
+				}
+				else if (vertex.Position == v3)
+				{
+					vert3 = &vertex;
+				}
+			}
+
+			result.push_back(TriangleDummy(vert1, vert2, vert3));
+		}
+
+		return result;
+	}
+
+	float RandomizeVertexes(vector<VertexDummy>& vertexes)
+	{
+		float sumRadius = 0;
+
+		for (auto& vertex : vertexes)
+		{
+			float phi = vertex.Phi;
+			float theta = vertex.Theta;
+
+			auto r = Random(0.25, 0.5);
+			vertex.Position = XMFLOAT3(r*cos(phi)*cos(theta), r*sin(phi), r*cos(phi)*sin(theta));
+
+			sumRadius += r;
+		}
+
+		return sumRadius / vertexes.size();
+	}
+
+	float sq(float number)
+	{
+		return number*number;
+	}
+
+	XMFLOAT3 GetColor(VertexDummy& vertex, XMFLOAT3& color1, XMFLOAT3& color2, XMFLOAT3 color3, float averageRadius)
+	{
+		auto x = vertex.Position.x;
+		auto y = vertex.Position.y;
+
+		float x_c1 = -averageRadius;
+		float y_c1 = 0;
+		float x_c2 = sin(XMConvertToRadians(30))*averageRadius;
+		float y_c2 = cos(XMConvertToRadians(30))*averageRadius;
+		float x_c3 = sin(XMConvertToRadians(30))*averageRadius;
+		float y_c3 = -cos(XMConvertToRadians(30))*averageRadius;
+
+		float d1 = pow(sqrt(sq(x_c1 - x) + sq(y_c1 - y)), 1);
+		float d2 = pow(sqrt(sq(x_c2 - x) + sq(y_c2 - y)), 1);
+		float d3 = pow(sqrt(sq(x_c3 - x) + sq(y_c3 - y)), 1);
+
+		float r = (color1.x * d1 + color2.x * d2 + color3.x * d3) / (d1 + d2 + d3);
+		float g = (color1.y * d1 + color2.y * d2 + color3.y * d3) / (d1 + d2 + d3);
+		float b = (color1.z * d1 + color2.z * d2 + color3.z * d3) / (d1 + d2 + d3);
+		return XMFLOAT3(r, g, b);
 	}
 
 	void Mesh::Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges)
@@ -189,7 +269,7 @@ namespace RandomMesh
 			newTList.clear();
 			removeTList.clear();
 
-			for(size_t index = tetras.size(); index > 0; index--)
+			for (size_t index = tetras.size(); index > 0; index--)
 			{
 				auto t = tetras[index - 1];
 				if (t.isCorrect && t.r > Distance(v.Position, t.o))
@@ -235,7 +315,7 @@ namespace RandomMesh
 			}
 		}
 
-		for(auto index = tetras.size(); index > 0; index--)
+		for (auto index = tetras.size(); index > 0; index--)
 		{
 			auto t4 = tetras[index - 1];
 			auto isOuter = false;

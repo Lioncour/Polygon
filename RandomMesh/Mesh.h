@@ -13,6 +13,11 @@ namespace RandomMesh
 
 	bool Equals(const XMFLOAT3& first, const XMFLOAT3& second);
 
+	bool static operator== (const XMFLOAT3& first, const XMFLOAT3& second)
+	{
+		return Equals(first, second);
+	}
+
 	float Distance(const XMFLOAT3& first, const XMFLOAT3& second);
 
 	float Dot(const XMFLOAT3& first, const XMFLOAT3& second);
@@ -30,15 +35,33 @@ namespace RandomMesh
 		float Theta;
 	};
 
-	class Mesh
-	{
-	private:
+	struct XmFloat3Equal
+	{	
+		bool operator()(const XMFLOAT3& _Left, const XMFLOAT3& _Right) const
+		{	
+			return _Left == _Right;
+		}
+	};
 
-	public:
-		Mesh(size_t vertexNum);
-		//std::vector<MeshVertex> GetVertexes();
-		void Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges);
-	};	
+	struct XmFloat3Hash
+	{
+		size_t operator()(const XMFLOAT3& value) const
+		{
+			hash<float> floatHasher;
+
+			size_t hash = 2166136261U;
+
+			hash ^= floatHasher(value.x);
+			hash *= 16777619U;
+
+			hash ^= floatHasher(value.y);
+			hash *= 16777619U;
+
+			hash ^= floatHasher(value.z);			
+
+			return hash;
+		}
+	};
 
 	class Line
 	{
@@ -146,6 +169,33 @@ namespace RandomMesh
 			}
 
 			return cnt == 3;
+		}
+	};
+
+	class LineDummy
+	{
+	public:
+		VertexDummy& Start, End;
+
+		LineDummy(VertexDummy& start, VertexDummy& end)
+			: Start(start), End(end)
+		{
+		}
+	};
+
+	class TriangleDummy
+	{
+	public:
+		VertexDummy *V1, *V2, *V3;
+		
+		TriangleDummy()
+			: V1(nullptr), V2(nullptr), V3(nullptr)
+		{
+		}
+
+		TriangleDummy(VertexDummy* v1, VertexDummy* v2, VertexDummy* v3)
+			: V1(v1), V2(v2), V3(v3)
+		{
 		}
 	};
 
@@ -371,5 +421,20 @@ namespace RandomMesh
 
 			return det;
 		}
+	};
+
+	class Mesh
+	{
+	private:
+		vector<VertexPositionColor> _gradientVertexes;
+		vector<VertexPositionColor> _solidVertexes;				
+
+	public:
+		Mesh(size_t vertexNum);
+		//std::vector<MeshVertex> GetVertexes();
+
+	private:
+		void Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges);
+		vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes);
 	};
 }
