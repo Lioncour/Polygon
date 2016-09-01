@@ -427,14 +427,18 @@ namespace RandomMesh
 	{
 	private:
 		vector<VertexPositionColor> _gradientVertexes;
-		vector<VertexPositionColor> _solidVertexes;				
+		vector<VertexPositionColor> _solidVertexes;
+		vector<uint16_t> _triangleIndices;
 
 	public:
 		Mesh(size_t vertexNum);
-		//std::vector<MeshVertex> GetVertexes();
+		vector<VertexPositionColor> GetVertices();
+		vector<uint16_t> GetIndices();
 
 	private:
 		void Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges);
 		vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes);
+		float RandomizeVertexes(vector<VertexDummy>& vertexes);
+		XMFLOAT3 GetColor(VertexDummy& vertex, XMFLOAT3& color1, XMFLOAT3& color2, XMFLOAT3 color3, float averageRadius);
 	};
 }

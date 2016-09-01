@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "Mesh.h"
+#include <chrono>
 
 #include "DirectXCollision.h"
 
 using namespace std;
+using namespace std::chrono;
 using namespace DirectX;
 
 namespace RandomMesh
@@ -63,34 +65,52 @@ namespace RandomMesh
 			vertexes.push_back(VertexDummy(r*cos(phi)*cos(theta), r*sin(phi), r*cos(phi)*sin(theta), phi, theta));
 		}
 
-		vertexes.clear();
-
-		vertexes.push_back(VertexDummy(-0.5f, -0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(-0.5f, -0.5f, 0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(-0.5f, 0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(-0.5f, 0.5f, 0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f, -0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f, -0.5f, 0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f, 0.5f, -0.5f, 0.0f, 0.0f));
-		vertexes.push_back(VertexDummy(0.5f, 0.5f, 0.5f, 0.0f, 0.0f));
-
 		vector<Triangle> triangles;
 		vector<Line> edges;
 
+		high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		Delaunay(vertexes, triangles, edges);
+		high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
+		auto duration = duration_cast<microseconds>(t2 - t1).count();
+		
 		auto triangleDummies = DoSmth(triangles, vertexes);
+		auto averageRadius = RandomizeVertexes(vertexes);
 
-		RandomizeVertexes(vertexes);
+		/*XMFLOAT3 color1(Random(1.0), Random(1.0), Random(1.0));
+		XMFLOAT3 color2(Random(1.0), Random(1.0), Random(1.0));
+		XMFLOAT3 color3(Random(1.0), Random(1.0), Random(1.0));*/
 
-
-
+		XMFLOAT3 color1(1.0, 0.0, 0.0);
+		XMFLOAT3 color2(0.0, 1.0, 0.0);
+		XMFLOAT3 color3(0.0, 0.0, 1.0);
+		
 		for (auto triangle : triangleDummies)
 		{
-			VertexPositionColor c = { triangle.V1->Position, GetColor(triangle.V1->Position, ) };
+			XMFLOAT3 colorT(Random(1.0), Random(1.0), Random(1.0));
 
-			_gradientVertexes.push_back(c);
+			_triangleIndices.push_back(_gradientVertexes.size());
+			//_gradientVertexes.push_back({ triangle.V1->Position, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
+			_gradientVertexes.push_back({ triangle.V1->Position, colorT });
+
+			_triangleIndices.push_back(_gradientVertexes.size());
+			//_gradientVertexes.push_back({ triangle.V2->Position, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
+			_gradientVertexes.push_back({ triangle.V2->Position, colorT });
+
+			_triangleIndices.push_back(_gradientVertexes.size());
+			//_gradientVertexes.push_back({ triangle.V3->Position, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });
+			_gradientVertexes.push_back({ triangle.V3->Position, colorT });
 		}
+	}
+
+	std::vector<VertexPositionColor> Mesh::GetVertices()
+	{
+		return _gradientVertexes;
+	}
+
+	vector<uint16_t> Mesh::GetIndices()
+	{
+		return _triangleIndices;
 	}
 
 	vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes)
@@ -130,7 +150,7 @@ namespace RandomMesh
 		return result;
 	}
 
-	float RandomizeVertexes(vector<VertexDummy>& vertexes)
+	float Mesh::RandomizeVertexes(vector<VertexDummy>& vertexes)
 	{
 		float sumRadius = 0;
 
@@ -153,7 +173,7 @@ namespace RandomMesh
 		return number*number;
 	}
 
-	XMFLOAT3 GetColor(VertexDummy& vertex, XMFLOAT3& color1, XMFLOAT3& color2, XMFLOAT3 color3, float averageRadius)
+	XMFLOAT3 Mesh::GetColor(VertexDummy& vertex, XMFLOAT3& color1, XMFLOAT3& color2, XMFLOAT3 color3, float averageRadius)
 	{
 		auto x = vertex.Position.x;
 		auto y = vertex.Position.y;
@@ -247,14 +267,14 @@ namespace RandomMesh
 		v2.z = center.z;
 
 		XMFLOAT3 v3;
-		v3.x = center.x + (float)sqrt(2)*r;
+		v3.x = center.x + (float)sqrt(2) * r;
 		v3.y = center.y - r;
-		v3.z = center.z + (float)sqrt(6)*r;
+		v3.z = center.z + (float)sqrt(6) * r;
 
 		XMFLOAT3 v4;
-		v4.x = center.x + (float)sqrt(2)*r;
+		v4.x = center.x + (float)sqrt(2) * r;
 		v4.y = center.y - r;
-		v4.z = center.z - (float)sqrt(6)*r;
+		v4.z = center.z - (float)sqrt(6) * r;
 
 		XMFLOAT3 outer[] = { v1, v2, v3, v4 };
 		tetras.push_back(Tetrahedron(v1, v2, v3, v4));

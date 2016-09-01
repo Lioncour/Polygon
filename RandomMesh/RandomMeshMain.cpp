@@ -12,8 +12,6 @@ using namespace Concurrency;
 RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
 {
-	auto mesh = new RandomMesh::Mesh(9);
-
 	// Register to be notified if the Device is lost or recreated
 	m_deviceResources->RegisterDeviceNotify(this);
 
