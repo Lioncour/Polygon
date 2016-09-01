@@ -101,4 +101,9 @@
   <ItemGroup>
     <Page Include="DirectXPage.xaml" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="BlackPixelShader.hlsl">
+      <Filter>Content</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

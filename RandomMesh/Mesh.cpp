@@ -58,7 +58,7 @@ namespace RandomMesh
 
 		for (size_t i = 0; i < vertexNum; i++)
 		{
-			float r = 0.25;
+			float r = 0.25 + Random(0.1);
 			float phi = XMConvertToRadians(Random(-90, 90));
 			float theta = XMConvertToRadians(Random(360));
 
@@ -90,16 +90,16 @@ namespace RandomMesh
 			XMFLOAT3 colorT(Random(1.0), Random(1.0), Random(1.0));
 
 			_triangleIndices.push_back(_gradientVertexes.size());
-			//_gradientVertexes.push_back({ triangle.V1->Position, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
-			_gradientVertexes.push_back({ triangle.V1->Position, colorT });
+			_gradientVertexes.push_back({ triangle.V1->Position, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
+			//_gradientVertexes.push_back({ triangle.V1->Position, colorT });
 
 			_triangleIndices.push_back(_gradientVertexes.size());
-			//_gradientVertexes.push_back({ triangle.V2->Position, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
-			_gradientVertexes.push_back({ triangle.V2->Position, colorT });
+			_gradientVertexes.push_back({ triangle.V2->Position, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
+			//_gradientVertexes.push_back({ triangle.V2->Position, colorT });
 
 			_triangleIndices.push_back(_gradientVertexes.size());
-			//_gradientVertexes.push_back({ triangle.V3->Position, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });
-			_gradientVertexes.push_back({ triangle.V3->Position, colorT });
+			_gradientVertexes.push_back({ triangle.V3->Position, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });
+			//_gradientVertexes.push_back({ triangle.V3->Position, colorT });
 		}
 	}
 

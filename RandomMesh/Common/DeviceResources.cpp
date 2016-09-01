@@ -414,7 +414,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 
 	// Create a depth stencil view for use with 3D rendering if needed.
 	CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
-		DXGI_FORMAT_D24_UNORM_S8_UINT, 
+		DXGI_FORMAT_D32_FLOAT, 
 		lround(m_d3dRenderTargetSize.Width),
 		lround(m_d3dRenderTargetSize.Height),
 		1, // This depth stencil view has only one texture.
@@ -439,6 +439,32 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 			&m_d3dDepthStencilView
 			)
 		);
+
+	//CD3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
+	//// Depth test parameters
+	//depthStencilStateDesc.DepthEnable = true;
+	//depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	//depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	//// Stencil test parameters
+	//depthStencilStateDesc.StencilEnable = true;
+	//depthStencilStateDesc.StencilReadMask = 0xFF;
+	//depthStencilStateDesc.StencilWriteMask = 0xFF;
+
+	//// Stencil operations if pixel is front-facing
+	//depthStencilStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	//depthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	//depthStencilStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	//depthStencilStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	//// Stencil operations if pixel is back-facing
+	//depthStencilStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	//depthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	//depthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	//depthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	//DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilState(&depthStencilStateDesc, &m_depthStencilState));
+	//m_d3dContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 
 	// Set the 3D rendering viewport to target the entire window.
 	m_screenViewport = CD3D11_VIEWPORT(

@@ -148,7 +148,7 @@ void Sample3DSceneRenderer::Render()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	context->IASetInputLayout(m_inputLayout.Get());
-
+	
 	// Attach our vertex shader.
 	context->VSSetShader(
 		m_vertexShader.Get(),
@@ -172,12 +172,19 @@ void Sample3DSceneRenderer::Render()
 		0
 		);
 
+	context->RSSetState(m_rastarizerState.Get());
+
 	// Draw the objects.
 	context->DrawIndexed(
 		m_indexCount,
 		0,
 		0
 		);
+
+	context->PSSetShader(m_blackPixelShader.Get(), nullptr, 0);
+	context->RSSetState(m_wireRastarizerState.Get());
+
+	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
 void Sample3DSceneRenderer::CreateDeviceDependentResources()
@@ -185,6 +192,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
 	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
+	auto loadBlackPSTask = DX::ReadDataAsync(L"BlackPixelShader.cso");
 
 	// After the vertex shader file is loaded, create the shader and input layout.
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
@@ -235,10 +243,22 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 			);
 	});
 
-	// Once both shaders are loaded, create the mesh.
-	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
+	auto createBlackPSTask = loadBlackPSTask.then([this](const std::vector<byte>& fileData) {
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreatePixelShader(
+				&fileData[0],
+				fileData.size(),
+				nullptr,
+				&m_blackPixelShader
+			)
+		);
+	});
 
-		RandomMesh::Mesh mesh(12);
+
+	// Once both shaders are loaded, create the mesh.
+	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] () {
+
+		RandomMesh::Mesh mesh(20);
 
 		auto vertices = mesh.GetVertices();
 		auto indices = mesh.GetIndices();
@@ -270,6 +290,21 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 				&m_indexBuffer
 				)
 			);
+
+		D3D11_RASTERIZER_DESC desc = {};
+		desc.FillMode = D3D11_FILL_SOLID;
+		desc.CullMode = D3D11_CULL_BACK;
+		desc.DepthClipEnable = true;
+				
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&desc, &m_rastarizerState));
+
+		D3D11_RASTERIZER_DESC wireDesc = {};
+		wireDesc.FillMode = D3D11_FILL_WIREFRAME;
+		wireDesc.CullMode = D3D11_CULL_BACK;
+		wireDesc.DepthClipEnable = true;
+		wireDesc.DepthBias = -200;
+						
+		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&wireDesc, &m_wireRastarizerState));
 	});
 
 	// Once the cube is loaded, the object is ready to be rendered.
@@ -287,4 +322,5 @@ void Sample3DSceneRenderer::ReleaseDeviceDependentResources()
 	m_constantBuffer.Reset();
 	m_vertexBuffer.Reset();
 	m_indexBuffer.Reset();
+	m_rastarizerState.Reset();
 }
