@@ -8,6 +8,7 @@ namespace RandomMesh
 		DirectX::XMFLOAT4X4 model;
 		DirectX::XMFLOAT4X4 view;
 		DirectX::XMFLOAT4X4 projection;
+		DirectX::XMFLOAT3 light;
 	};
 
 	// Used to send per-vertex data to the vertex shader.

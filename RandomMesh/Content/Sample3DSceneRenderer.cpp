@@ -172,6 +172,14 @@ void Sample3DSceneRenderer::Render()
 		0
 		);
 
+	context->PSSetConstantBuffers1(
+		0,
+		1,
+		m_constantBuffer.GetAddressOf(),
+		nullptr,
+		nullptr
+	);
+
 	context->RSSetState(m_rastarizerState.Get());
 
 	// Draw the objects.
@@ -234,7 +242,9 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 				)
 			);
 
-		CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelViewProjectionConstantBuffer) , D3D11_BIND_CONSTANT_BUFFER);
+		auto bufferSize = (sizeof(ModelViewProjectionConstantBuffer) + 16) & ~0x0F;
+		CD3D11_BUFFER_DESC constantBufferDesc(bufferSize, D3D11_BIND_CONSTANT_BUFFER);
+
 		DX::ThrowIfFailed(
 			m_deviceResources->GetD3DDevice()->CreateBuffer(
 				&constantBufferDesc,
@@ -260,6 +270,8 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] () {
 
 		RandomMesh::Mesh mesh(20);
+
+		m_constantBufferData.light = XMFLOAT3(Random(1.0), Random(1.0), Random(1.0));
 
 		auto vertices = mesh.GetVertices();
 		auto indices = mesh.GetIndices();

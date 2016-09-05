@@ -71,13 +71,9 @@ namespace RandomMesh
 		vector<Triangle> triangles;
 		vector<Line> edges;
 
-		//high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		Delaunay(vertexes, triangles, edges);
-		//high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
-		//auto duration = duration_cast<microseconds>(t2 - t1).count();
 		
-		auto triangleDummies = DoSmth(triangles, vertexes);
+		auto triangleDummies = CreateTrianglesMappedToSourceVertices(triangles, vertexes);
 		auto averageRadius = RandomizeVertexes(vertexes);
 
 		XMFLOAT3 color1(Random(1.0), Random(1.0), Random(1.0));
@@ -87,14 +83,11 @@ namespace RandomMesh
 		/*XMFLOAT3 color1(1.0, 0.0, 0.0);
 		XMFLOAT3 color2(0.0, 1.0, 0.0);
 		XMFLOAT3 color3(0.0, 0.0, 1.0);*/
-		
-		auto index = 10;
 
 		for (auto triangle : triangleDummies)
 		{
 			auto normal = triangle.Normal;
-			normal = triangle.GetNormal();
-
+			
 			_triangleIndices.push_back(_gradientVertexes.size());
 			_gradientVertexes.push_back({ triangle.V1->Position, normal, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
 			
@@ -116,7 +109,7 @@ namespace RandomMesh
 		return _triangleIndices;
 	}
 
-	vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes)
+	vector<TriangleDummy> Mesh::CreateTrianglesMappedToSourceVertices(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes)
 	{
 		vector<TriangleDummy> result;
 		result.reserve(triangles.size());

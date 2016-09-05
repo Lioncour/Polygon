@@ -3,7 +3,8 @@ cbuffer ModelViewProjectionConstantBuffer : register(b0)
 {
 	matrix model;
 	matrix view;
-	matrix projection;	
+	matrix projection;
+	float3 light;
 };
 
 // Per-vertex data used as input to the vertex shader.

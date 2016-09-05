@@ -105,9 +105,6 @@ namespace RandomMesh
 
 	class Triangle
 	{
-	private:
-		XMFLOAT3 m_normal;
-
 	public:
 		XMFLOAT3 v1, v2, v3;		
 
@@ -116,17 +113,21 @@ namespace RandomMesh
 			this->v1 = v1;
 			this->v2 = v2;
 			this->v3 = v3;
-
-			XMVECTOR edge1 = XMVectorSet(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z, 0.0f);
-			XMVECTOR edge2 = XMVectorSet(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z, 0.0f);
-
-			auto cross = XMVector3Normalize(XMVector3Cross(edge1, edge2));
-			XMStoreFloat3(&m_normal, cross);
 		}
 
 		XMFLOAT3 GetNormal() const
 		{
-			return m_normal;
+			auto v1 = XMLoadFloat3(&this->v1);
+			auto v2 = XMLoadFloat3(&this->v2);
+			auto v3 = XMLoadFloat3(&this->v3);
+
+			auto result = XMVector3Cross(v1 - v2, v1 - v3);
+			result = XMVector3Normalize(result);
+
+			XMFLOAT3 normal;
+			XMStoreFloat3(&normal, result);
+
+			return normal;
 		}
 
 		void TurnBack()
@@ -134,12 +135,6 @@ namespace RandomMesh
 			XMFLOAT3 tmp = v3;
 			v3 = v1;
 			v1 = tmp;
-
-			XMVECTOR edge1 = XMVectorSet(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z, 0.0f);
-			XMVECTOR edge2 = XMVectorSet(v3.x - v1.x, v3.y - v1.y, v3.z - v1.z, 0.0f);
-
-			auto cross = XMVector3Normalize(XMVector3Cross(edge1, edge2));
-			XMStoreFloat3(&m_normal, cross);
 		}
 
 		std::vector<Line> GetLines() const
@@ -205,22 +200,7 @@ namespace RandomMesh
 		TriangleDummy(VertexDummy* v1, VertexDummy* v2, VertexDummy* v3, XMFLOAT3 normal)
 			: V1(v1), V2(v2), V3(v3), Normal(normal)
 		{
-		}
-
-		XMFLOAT3 GetNormal()
-		{
-			auto v1 = XMLoadFloat3(&V1->Position);
-			auto v2 = XMLoadFloat3(&V2->Position);
-			auto v3 = XMLoadFloat3(&V3->Position);
-
-			auto result = XMVector3Cross(v1 - v2, v1 - v3);
-			result = XMVector3Normalize(result);
-
-			XMFLOAT3 normal;
-			XMStoreFloat3(&normal, result);
-
-			return normal;
-		}
+		}		
 	};
 
 	class Tetrahedron
@@ -461,7 +441,7 @@ namespace RandomMesh
 
 	private:
 		void Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges);
-		vector<TriangleDummy> Mesh::DoSmth(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes);
+		vector<TriangleDummy> Mesh::CreateTrianglesMappedToSourceVertices(const vector<Triangle>& triangles, vector<VertexDummy>& vertexes);
 		float RandomizeVertexes(vector<VertexDummy>& vertexes);
 		XMFLOAT3 GetColor(VertexDummy& vertex, XMFLOAT3& color1, XMFLOAT3& color2, XMFLOAT3 color3, float averageRadius);
 	};

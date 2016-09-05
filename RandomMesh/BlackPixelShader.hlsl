@@ -1,3 +1,11 @@
+cbuffer ModelViewProjectionConstantBuffer : register(b0)
+{
+	matrix model;
+	matrix view;
+	matrix projection;
+	float3 light;
+};
+
 struct PixelShaderInput
 {
 	float4 pos : SV_POSITION;
