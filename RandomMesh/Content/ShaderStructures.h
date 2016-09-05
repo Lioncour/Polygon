@@ -14,12 +14,7 @@ namespace RandomMesh
 	struct VertexPositionColor
 	{
 		DirectX::XMFLOAT3 pos;
-		DirectX::XMFLOAT3 color;
-	};
-
-	struct MeshVertex
-	{
-		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT3 color;
 	};
 }

@@ -12,12 +12,15 @@ namespace RandomMesh
 {
 	float Random(float maxValue)
 	{
-		return (float)rand() / RAND_MAX * maxValue;
+		auto value = Windows::Security::Cryptography::CryptographicBuffer::GenerateRandomNumber();
+		return (float)value / (numeric_limits<unsigned int>::max)() * maxValue;
 	}
 
 	float Random(float minValue, float maxValue)
 	{
-		return minValue + (float)rand() / RAND_MAX * (maxValue - minValue);
+		auto value = Windows::Security::Cryptography::CryptographicBuffer::GenerateRandomNumber();
+
+		return minValue + (float)value / (numeric_limits<unsigned int>::max)() * (maxValue - minValue);
 	}
 
 	bool Equals(const XMFLOAT3& first, const XMFLOAT3& second)
@@ -68,38 +71,38 @@ namespace RandomMesh
 		vector<Triangle> triangles;
 		vector<Line> edges;
 
-		high_resolution_clock::time_point t1 = high_resolution_clock::now();
+		//high_resolution_clock::time_point t1 = high_resolution_clock::now();
 		Delaunay(vertexes, triangles, edges);
-		high_resolution_clock::time_point t2 = high_resolution_clock::now();
+		//high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-		auto duration = duration_cast<microseconds>(t2 - t1).count();
+		//auto duration = duration_cast<microseconds>(t2 - t1).count();
 		
 		auto triangleDummies = DoSmth(triangles, vertexes);
 		auto averageRadius = RandomizeVertexes(vertexes);
 
-		/*XMFLOAT3 color1(Random(1.0), Random(1.0), Random(1.0));
+		XMFLOAT3 color1(Random(1.0), Random(1.0), Random(1.0));
 		XMFLOAT3 color2(Random(1.0), Random(1.0), Random(1.0));
-		XMFLOAT3 color3(Random(1.0), Random(1.0), Random(1.0));*/
+		XMFLOAT3 color3(Random(1.0), Random(1.0), Random(1.0));
 
-		XMFLOAT3 color1(1.0, 0.0, 0.0);
+		/*XMFLOAT3 color1(1.0, 0.0, 0.0);
 		XMFLOAT3 color2(0.0, 1.0, 0.0);
-		XMFLOAT3 color3(0.0, 0.0, 1.0);
+		XMFLOAT3 color3(0.0, 0.0, 1.0);*/
 		
+		auto index = 10;
+
 		for (auto triangle : triangleDummies)
 		{
-			XMFLOAT3 colorT(Random(1.0), Random(1.0), Random(1.0));
+			auto normal = triangle.Normal;
+			normal = triangle.GetNormal();
 
 			_triangleIndices.push_back(_gradientVertexes.size());
-			_gradientVertexes.push_back({ triangle.V1->Position, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
-			//_gradientVertexes.push_back({ triangle.V1->Position, colorT });
-
+			_gradientVertexes.push_back({ triangle.V1->Position, normal, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
+			
 			_triangleIndices.push_back(_gradientVertexes.size());
-			_gradientVertexes.push_back({ triangle.V2->Position, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
-			//_gradientVertexes.push_back({ triangle.V2->Position, colorT });
-
+			_gradientVertexes.push_back({ triangle.V2->Position, normal, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
+			
 			_triangleIndices.push_back(_gradientVertexes.size());
-			_gradientVertexes.push_back({ triangle.V3->Position, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });
-			//_gradientVertexes.push_back({ triangle.V3->Position, colorT });
+			_gradientVertexes.push_back({ triangle.V3->Position, normal, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });			
 		}
 	}
 
@@ -144,7 +147,7 @@ namespace RandomMesh
 				}
 			}
 
-			result.push_back(TriangleDummy(vert1, vert2, vert3));
+			result.push_back(TriangleDummy(vert1, vert2, vert3, triangle.GetNormal()));
 		}
 
 		return result;
