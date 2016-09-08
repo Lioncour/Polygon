@@ -91,7 +91,7 @@ void RandomMeshMain::Update()
 void RandomMeshMain::ProcessInput()
 {
 	// TODO: Add per frame input handling here.
-	m_sceneRenderer->TrackingUpdate(m_pointerLocationX);
+	m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY);
 }
 
 // Renders the current frame according to the current application state.

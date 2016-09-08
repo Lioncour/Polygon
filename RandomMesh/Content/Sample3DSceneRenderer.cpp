@@ -59,7 +59,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	// Eye is at (0,0.7,1.5), looking at point (0,-0.1,0) with the up-vector along the y-axis.
 	static const XMVECTORF32 eye = { 0.0f, 0.7f, 1.5f, 0.0f };
-	static const XMVECTORF32 at = { 0.0f, -0.1f, 0.0f, 0.0f };
+	static const XMVECTORF32 at = { 0.0f, 0.0f, 0.0f, 0.0f };
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
@@ -70,34 +70,48 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
 	if (!m_tracking)
 	{
-		// Convert degrees to radians, then convert seconds to rotation angle
-		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
-		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
+		auto elapsed = timer.GetElapsedSeconds();
 
-		Rotate(radians);
+		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
+		m_rotationY += elapsed * radiansPerSecond;
+				
+		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
+
+		Rotate(m_rotationX, m_rotationY);
 	}
 }
 
 // Rotate the 3D cube model a set amount of radians.
-void Sample3DSceneRenderer::Rotate(float radians)
+void Sample3DSceneRenderer::Rotate(float rotationX, float rotationY)
 {
 	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(radians)));
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationX(rotationX) * XMMatrixRotationY(rotationY)));
 }
 
-void Sample3DSceneRenderer::StartTracking()
+void Sample3DSceneRenderer::StartTracking(float x, float y)
 {
 	m_tracking = true;
+	m_baseTrackingX = x;
+	m_baseTrackingY = y;
 }
 
 // When tracking, the 3D cube can be rotated around its Y axis by tracking pointer position relative to the output screen width.
-void Sample3DSceneRenderer::TrackingUpdate(float positionX)
+void Sample3DSceneRenderer::TrackingUpdate(float x, float y)
 {
 	if (m_tracking)
 	{
-		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
-		Rotate(radians);
+		auto deltaX = x - m_baseTrackingX;
+		auto deltaY = y - m_baseTrackingY;
+
+		auto size = fmin(m_deviceResources->GetOutputSize().Height, m_deviceResources->GetOutputSize().Width);
+
+		m_rotationX += XM_2PI * 2.0f * deltaY / size;
+		m_rotationY += XM_2PI * 2.0f * deltaX / size;
+
+		Rotate(m_rotationX, m_rotationY);
+
+		m_baseTrackingX = x;
+		m_baseTrackingY = y;
 	}
 }
 
@@ -269,9 +283,9 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] () {
 
-		RandomMesh::Mesh mesh(20);
+		RandomMesh::Mesh mesh(Random(10, 50));
 
-		m_constantBufferData.light = XMFLOAT3(Random(1.0), Random(1.0), Random(1.0));
+		m_constantBufferData.light = XMFLOAT3(Random(-1.0, 1.0), Random(-1.0, 1.0), Random(-1.0, 1.0));
 
 		auto vertices = mesh.GetVertices();
 		auto indices = mesh.GetIndices();

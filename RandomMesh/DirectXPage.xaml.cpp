@@ -153,17 +153,10 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
 	m_deviceResources->ValidateDevice();
 }
 
-// Called when the app bar button is clicked.
-void DirectXPage::AppBarButton_Click(Object^ sender, RoutedEventArgs^ e)
-{
-	// Use the app bar if it is appropriate for your app. Design the app bar, 
-	// then fill in event handlers (like this one).
-}
-
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
 	// When the pointer is pressed begin tracking the pointer movement.
-	m_main->StartTracking();
+	m_main->StartTracking(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
 }
 
 void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
@@ -171,7 +164,7 @@ void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 	// Update the pointer tracking code.
 	if (m_main->IsTracking())
 	{
-		m_main->TrackingUpdate(e->CurrentPoint->Position.X);
+		m_main->TrackingUpdate(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
 	}
 }
 

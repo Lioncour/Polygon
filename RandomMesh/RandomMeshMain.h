@@ -8,14 +8,15 @@
 // Renders Direct2D and 3D content on the screen.
 namespace RandomMesh
 {
-	class RandomMeshMain : public DX::IDeviceNotify
+	class RandomMeshMain
+		: public DX::IDeviceNotify
 	{
 	public:
 		RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		~RandomMeshMain();
 		void CreateWindowSizeDependentResources();
-		void StartTracking() { m_sceneRenderer->StartTracking(); }
-		void TrackingUpdate(float positionX) { m_pointerLocationX = positionX; }
+		void StartTracking(float x, float y) { m_pointerLocationX = x; m_pointerLocationY = y; m_sceneRenderer->StartTracking(x, y); }
+		void TrackingUpdate(float x, float y) { m_pointerLocationX = x; m_pointerLocationY = y; }
 		void StopTracking() { m_sceneRenderer->StopTracking(); }
 		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
 		void StartRenderLoop();
@@ -46,5 +47,6 @@ namespace RandomMesh
 
 		// Track current input pointer position.
 		float m_pointerLocationX;
+		float m_pointerLocationY;
 	};
 }

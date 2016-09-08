@@ -16,14 +16,14 @@ namespace RandomMesh
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
 		void Render();
-		void StartTracking();
-		void TrackingUpdate(float positionX);
+		void StartTracking(float x, float y);
+		void TrackingUpdate(float x, float y);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }
 
 
 	private:
-		void Rotate(float radians);
+		void Rotate(float rotationX, float rotationY);
 
 	private:
 		// Cached pointer to device resources.
@@ -46,8 +46,16 @@ namespace RandomMesh
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;
-		float	m_degreesPerSecond;
+		
+		float	m_degreesPerSecond;		
+		
 		bool	m_tracking;
+		
+		float	m_baseTrackingX;
+		float	m_baseTrackingY;
+		
+		float	m_rotationX;
+		float	m_rotationY;
 	};
 }
 
