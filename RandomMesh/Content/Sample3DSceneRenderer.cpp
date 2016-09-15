@@ -14,7 +14,11 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 	m_degreesPerSecond(45),
 	m_indexCount(0),
 	m_tracking(false),
-	m_deviceResources(deviceResources)
+	m_deviceResources(deviceResources),
+	m_rotationX(0.0),
+	m_rotationY(0.0),
+	m_baseTrackingX(0.0),
+	m_baseTrackingY(0.0)
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
@@ -68,12 +72,14 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 {
+	return;
+
 	if (!m_tracking)
 	{
 		auto elapsed = timer.GetElapsedSeconds();
 
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-		m_rotationY += elapsed * radiansPerSecond;
+		m_rotationY += static_cast<float>(elapsed * radiansPerSecond);
 				
 		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
 
@@ -107,6 +113,9 @@ void Sample3DSceneRenderer::TrackingUpdate(float x, float y)
 
 		m_rotationX += XM_2PI * 2.0f * deltaY / size;
 		m_rotationY += XM_2PI * 2.0f * deltaX / size;
+
+		m_rotationX = static_cast<float>(fmod(m_rotationX, XM_2PI));
+		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
 
 		Rotate(m_rotationX, m_rotationY);
 
@@ -283,7 +292,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	// Once both shaders are loaded, create the mesh.
 	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] () {
 
-		RandomMesh::Mesh mesh(Random(10, 50));
+		RandomMesh::Mesh mesh(static_cast<size_t>(Random(10, 50)));
 
 		m_constantBufferData.light = XMFLOAT3(Random(-1.0, 1.0), Random(-1.0, 1.0), Random(-1.0, 1.0));
 

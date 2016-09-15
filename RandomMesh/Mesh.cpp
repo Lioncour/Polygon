@@ -61,7 +61,7 @@ namespace RandomMesh
 
 		for (size_t i = 0; i < vertexNum; i++)
 		{
-			float r = 0.25 + Random(0.1);
+			float r = 0.25f + Random(0.1);
 			float phi = XMConvertToRadians(Random(-90, 90));
 			float theta = XMConvertToRadians(Random(360));
 
@@ -88,13 +88,13 @@ namespace RandomMesh
 		{
 			auto normal = triangle.Normal;
 			
-			_triangleIndices.push_back(_gradientVertexes.size());
+			_triangleIndices.push_back(static_cast<uint16_t>(_gradientVertexes.size()));
 			_gradientVertexes.push_back({ triangle.V1->Position, normal, GetColor(*triangle.V1, color1, color2, color3, averageRadius) });
 			
-			_triangleIndices.push_back(_gradientVertexes.size());
+			_triangleIndices.push_back(static_cast<uint16_t>(_gradientVertexes.size()));
 			_gradientVertexes.push_back({ triangle.V2->Position, normal, GetColor(*triangle.V2, color1, color2, color3, averageRadius) });
 			
-			_triangleIndices.push_back(_gradientVertexes.size());
+			_triangleIndices.push_back(static_cast<uint16_t>(_gradientVertexes.size()));
 			_gradientVertexes.push_back({ triangle.V3->Position, normal, GetColor(*triangle.V3, color1, color2, color3, averageRadius) });			
 		}
 	}
@@ -310,9 +310,9 @@ namespace RandomMesh
 
 			vector<bool> isRedundancy(newTList.size(), false);
 
-			for (int i = 0; i < newTList.size(); i++)
+			for (size_t i = 0; i < newTList.size(); i++)
 			{
-				for (int j = i + 1; j < newTList.size(); j++)
+				for (size_t j = i + 1; j < newTList.size(); j++)
 				{
 					if (newTList[i].Equals(newTList[j]))
 					{
@@ -322,7 +322,7 @@ namespace RandomMesh
 				}
 			}
 
-			for (int i = 0; i < isRedundancy.size(); i++)
+			for (size_t i = 0; i < isRedundancy.size(); i++)
 			{
 				if (!isRedundancy[i])
 				{
@@ -456,9 +456,9 @@ namespace RandomMesh
 		}
 
 		vector<bool> isRedundancy(surfaceEdgeList.size(), false);
-		for (int i = 0; i < surfaceEdgeList.size(); i++)
+		for (size_t i = 0; i < surfaceEdgeList.size(); i++)
 		{
-			for (int j = i + 1; j < surfaceEdgeList.size(); j++)
+			for (size_t j = i + 1; j < surfaceEdgeList.size(); j++)
 			{
 				if (surfaceEdgeList[i].Equals(surfaceEdgeList[j]))
 				{
@@ -467,7 +467,7 @@ namespace RandomMesh
 			}
 		}
 
-		for (int i = 0; i < isRedundancy.size(); i++)
+		for (size_t i = 0; i < isRedundancy.size(); i++)
 		{
 			if (!isRedundancy[i])
 			{

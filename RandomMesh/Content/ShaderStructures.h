@@ -17,5 +17,17 @@ namespace RandomMesh
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT3 normal;
 		DirectX::XMFLOAT3 color;
+	};	
+
+	struct BackgroundConstantBuffer
+	{
+		float bias;
+		float ratio;
+	};
+
+	struct BackgroundVertex
+	{
+		DirectX::XMFLOAT3 pos;
+		DirectX::XMFLOAT2 tex;
 	};
 }

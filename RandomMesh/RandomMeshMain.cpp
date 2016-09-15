@@ -18,7 +18,7 @@ RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& devic
 	// TODO: Replace this with your app's content initialization.
 	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
 
-	m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
+	m_backgroundRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -83,7 +83,7 @@ void RandomMeshMain::Update()
 	{
 		// TODO: Replace this with your app's content update functions.
 		m_sceneRenderer->Update(m_timer);
-		m_fpsTextRenderer->Update(m_timer);
+		m_backgroundRenderer->Update(m_timer);
 	});
 }
 
@@ -118,10 +118,12 @@ bool RandomMeshMain::Render()
 	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::CornflowerBlue);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// Render the scene objects.
-	// TODO: Replace this with your app's content rendering functions.
+	// Render the scene objects.	
+	m_backgroundRenderer->Render();
+
+	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
 	m_sceneRenderer->Render();
-	m_fpsTextRenderer->Render();
 
 	return true;
 }
@@ -130,13 +132,13 @@ bool RandomMeshMain::Render()
 void RandomMeshMain::OnDeviceLost()
 {
 	m_sceneRenderer->ReleaseDeviceDependentResources();
-	m_fpsTextRenderer->ReleaseDeviceDependentResources();
+	m_backgroundRenderer->ReleaseDeviceDependentResources();
 }
 
 // Notifies renderers that device resources may now be recreated.
 void RandomMeshMain::OnDeviceRestored()
 {
 	m_sceneRenderer->CreateDeviceDependentResources();
-	m_fpsTextRenderer->CreateDeviceDependentResources();
+	m_backgroundRenderer->CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
