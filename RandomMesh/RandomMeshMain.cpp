@@ -16,7 +16,7 @@ RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& devic
 	m_deviceResources->RegisterDeviceNotify(this);
 
 	// TODO: Replace this with your app's content initialization.
-	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
+	m_sceneRenderer = std::unique_ptr<MeshRenderer>(new MeshRenderer(m_deviceResources));
 	m_backgroundRenderer = std::unique_ptr<BackhroundRenderer>(new BackhroundRenderer(m_deviceResources));
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.

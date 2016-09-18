@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Sample3DSceneRenderer.h"
+#include "MeshRenderer.h"
 #include "Mesh.h"
 #include "..\Common\DirectXHelper.h"
 
@@ -9,7 +9,7 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
-Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
+MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
@@ -25,7 +25,7 @@ Sample3DSceneRenderer::Sample3DSceneRenderer(const std::shared_ptr<DX::DeviceRes
 }
 
 // Initializes view parameters when the window size changes.
-void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
+void MeshRenderer::CreateWindowSizeDependentResources()
 {
 	Size outputSize = m_deviceResources->GetOutputSize();
 	float aspectRatio = outputSize.Width / outputSize.Height;
@@ -70,7 +70,7 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
-void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
+void MeshRenderer::Update(DX::StepTimer const& timer)
 {
 	return;
 
@@ -88,13 +88,13 @@ void Sample3DSceneRenderer::Update(DX::StepTimer const& timer)
 }
 
 // Rotate the 3D cube model a set amount of radians.
-void Sample3DSceneRenderer::Rotate(float rotationX, float rotationY)
+void MeshRenderer::Rotate(float rotationX, float rotationY)
 {
 	// Prepare to pass the updated model matrix to the shader
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationX(rotationX) * XMMatrixRotationY(rotationY)));
 }
 
-void Sample3DSceneRenderer::StartTracking(float x, float y)
+void MeshRenderer::StartTracking(float x, float y)
 {
 	m_tracking = true;
 	m_baseTrackingX = x;
@@ -102,7 +102,7 @@ void Sample3DSceneRenderer::StartTracking(float x, float y)
 }
 
 // When tracking, the 3D cube can be rotated around its Y axis by tracking pointer position relative to the output screen width.
-void Sample3DSceneRenderer::TrackingUpdate(float x, float y)
+void MeshRenderer::TrackingUpdate(float x, float y)
 {
 	if (m_tracking)
 	{
@@ -124,13 +124,13 @@ void Sample3DSceneRenderer::TrackingUpdate(float x, float y)
 	}
 }
 
-void Sample3DSceneRenderer::StopTracking()
+void MeshRenderer::StopTracking()
 {
 	m_tracking = false;
 }
 
 // Renders one frame using the vertex and pixel shaders.
-void Sample3DSceneRenderer::Render()
+void MeshRenderer::Render()
 {
 	// Loading is asynchronous. Only draw geometry after it's loaded.
 	if (!m_loadingComplete)
@@ -218,7 +218,7 @@ void Sample3DSceneRenderer::Render()
 	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
-void Sample3DSceneRenderer::CreateDeviceDependentResources()
+void MeshRenderer::CreateDeviceDependentResources()
 {
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
@@ -338,8 +338,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		wireDesc.FillMode = D3D11_FILL_WIREFRAME;
 		wireDesc.CullMode = D3D11_CULL_BACK;
 		wireDesc.DepthClipEnable = true;
-		wireDesc.DepthBias = -500;
-		wireDesc.AntialiasedLineEnable = true;
+		wireDesc.DepthBias = -500;		
 						
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&wireDesc, &m_wireRastarizerState));
 	});
@@ -350,7 +349,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 	});
 }
 
-void Sample3DSceneRenderer::ReleaseDeviceDependentResources()
+void MeshRenderer::ReleaseDeviceDependentResources()
 {
 	m_loadingComplete = false;
 	m_vertexShader.Reset();
