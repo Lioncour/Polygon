@@ -17,8 +17,7 @@ RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& devic
 
 	// TODO: Replace this with your app's content initialization.
 	m_sceneRenderer = std::unique_ptr<Sample3DSceneRenderer>(new Sample3DSceneRenderer(m_deviceResources));
-
-	m_backgroundRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
+	m_backgroundRenderer = std::unique_ptr<BackhroundRenderer>(new BackhroundRenderer(m_deviceResources));
 
 	// TODO: Change the timer settings if you want something other than the default variable timestep mode.
 	// e.g. for 60 FPS fixed timestep update logic, call:
@@ -78,10 +77,8 @@ void RandomMeshMain::Update()
 {
 	ProcessInput();
 
-	// Update scene objects.
 	m_timer.Tick([&]()
 	{
-		// TODO: Replace this with your app's content update functions.
 		m_sceneRenderer->Update(m_timer);
 		m_backgroundRenderer->Update(m_timer);
 	});
@@ -94,8 +91,6 @@ void RandomMeshMain::ProcessInput()
 	m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY);
 }
 
-// Renders the current frame according to the current application state.
-// Returns true if the frame was rendered and is ready to be displayed.
 bool RandomMeshMain::Render() 
 {
 	// Don't try to render anything before the first Update.
@@ -118,9 +113,10 @@ bool RandomMeshMain::Render()
 	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::CornflowerBlue);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-	// Render the scene objects.	
+	// Render background
 	m_backgroundRenderer->Render();
 
+	// Render mesh
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	m_sceneRenderer->Render();
@@ -140,5 +136,6 @@ void RandomMeshMain::OnDeviceRestored()
 {
 	m_sceneRenderer->CreateDeviceDependentResources();
 	m_backgroundRenderer->CreateDeviceDependentResources();
+
 	CreateWindowSizeDependentResources();
 }

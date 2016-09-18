@@ -26,16 +26,10 @@
     <ClInclude Include="Content\Sample3DSceneRenderer.h">
       <Filter>Content</Filter>
     </ClInclude>
-    <ClInclude Include="Content\SampleFpsTextRenderer.h">
-      <Filter>Content</Filter>
-    </ClInclude>
     <ClInclude Include="Content\ShaderStructures.h">
       <Filter>Content</Filter>
     </ClInclude>
     <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
-      <Filter>Content</Filter>
-    </ClCompile>
-    <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
@@ -74,6 +68,9 @@
     <ClCompile Include="Mesh.cpp">
       <Filter>Mesh</Filter>
     </ClCompile>
+    <ClCompile Include="Content\BackhroundRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -85,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="ScrollingBackground.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\BackhroundRenderer.h">
+      <Filter>Content</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 #include "Common\StepTimer.h"
 #include "Common\DeviceResources.h"
 #include "Content\Sample3DSceneRenderer.h"
-#include "Content\SampleFpsTextRenderer.h"
+#include "Content\BackhroundRenderer.h"
 
 // Renders Direct2D and 3D content on the screen.
 namespace RandomMesh
@@ -37,7 +37,7 @@ namespace RandomMesh
 
 		// TODO: Replace with your own content renderers.
 		std::unique_ptr<Sample3DSceneRenderer> m_sceneRenderer;
-		std::unique_ptr<SampleFpsTextRenderer> m_backgroundRenderer;
+		std::unique_ptr<BackhroundRenderer> m_backgroundRenderer;
 
 		Windows::Foundation::IAsyncAction^ m_renderLoopWorker;
 		Concurrency::critical_section m_criticalSection;

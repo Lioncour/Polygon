@@ -400,9 +400,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 
 	// Create a render target view of the swap chain back buffer.
 	ComPtr<ID3D11Texture2D1> backBuffer;
-	DX::ThrowIfFailed(
-		m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer))
-		);
+	DX::ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer)));
 
 	DX::ThrowIfFailed(
 		m_d3dDevice->CreateRenderTargetView1(
@@ -439,32 +437,6 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 			&m_d3dDepthStencilView
 			)
 		);
-
-	//CD3D11_DEPTH_STENCIL_DESC depthStencilStateDesc;
-	//// Depth test parameters
-	//depthStencilStateDesc.DepthEnable = true;
-	//depthStencilStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	//depthStencilStateDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-	//// Stencil test parameters
-	//depthStencilStateDesc.StencilEnable = true;
-	//depthStencilStateDesc.StencilReadMask = 0xFF;
-	//depthStencilStateDesc.StencilWriteMask = 0xFF;
-
-	//// Stencil operations if pixel is front-facing
-	//depthStencilStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencilStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	//depthStencilStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencilStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_LESS_EQUAL;
-
-	//// Stencil operations if pixel is back-facing
-	//depthStencilStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencilStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	//depthStencilStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	//depthStencilStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	//DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilState(&depthStencilStateDesc, &m_depthStencilState));
-	//m_d3dContext->OMSetDepthStencilState(m_depthStencilState.Get(), 0);
 
 	// Set the 3D rendering viewport to target the entire window.
 	m_screenViewport = CD3D11_VIEWPORT(

@@ -1,13 +1,12 @@
 ﻿#include "pch.h"
-#include "SpriteBatch.h"
-#include "SampleFpsTextRenderer.h"
+#include "BackhroundRenderer.h"
 
 #include "Common/DirectXHelper.h"
 
 using namespace RandomMesh;
 using namespace Microsoft::WRL;
 
-SampleFpsTextRenderer::SampleFpsTextRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
+BackhroundRenderer::BackhroundRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources),
 	m_loadingComplete(false)	
 {
@@ -17,7 +16,7 @@ SampleFpsTextRenderer::SampleFpsTextRenderer(const std::shared_ptr<DX::DeviceRes
 	m_constantBufferData.ratio = 1;
 }
 
-void SampleFpsTextRenderer::Update(DX::StepTimer const& timer)
+void BackhroundRenderer::Update(DX::StepTimer const& timer)
 {
 	auto time = timer.GetElapsedSeconds();
 
@@ -25,7 +24,7 @@ void SampleFpsTextRenderer::Update(DX::StepTimer const& timer)
 	m_constantBufferData.bias = fmod(m_constantBufferData.bias, 2.0f);
 }
 
-void SampleFpsTextRenderer::Render()
+void BackhroundRenderer::Render()
 {
 	if (m_loadingComplete == false)
 	{
@@ -74,7 +73,7 @@ void SampleFpsTextRenderer::Render()
 	context->DrawIndexed(6, 0, 0);
 }
 
-void SampleFpsTextRenderer::CreateDeviceDependentResources()
+void BackhroundRenderer::CreateDeviceDependentResources()
 {
 	// Load shaders asynchronously.
 	auto loadVSTask = DX::ReadDataAsync(L"BackgroundVertexShader.cso");
@@ -180,7 +179,7 @@ void SampleFpsTextRenderer::CreateDeviceDependentResources()
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_BACK;
 		desc.DepthClipEnable = true;
-
+		
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&desc, &m_rastarizerState));
 	});
 
@@ -218,8 +217,19 @@ void SampleFpsTextRenderer::CreateDeviceDependentResources()
 	});
 }
 
-void SampleFpsTextRenderer::ReleaseDeviceDependentResources()
+void BackhroundRenderer::ReleaseDeviceDependentResources()
 {
+	m_inputLayout.Reset();
+	m_vertexBuffer.Reset();
+	m_indexBuffer.Reset();
+	m_vertexShader.Reset();
+	m_pixelShader.Reset();
+	m_constantBuffer.Reset();
+	m_rastarizerState.Reset();
+
+	m_backgroundSampler.Reset();
+	m_backgroundTexture.Reset();	
+
 	m_backgroundTexture.Reset();
 
 	m_loadingComplete = false;

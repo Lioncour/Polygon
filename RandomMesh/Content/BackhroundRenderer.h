@@ -15,10 +15,10 @@ using Microsoft::WRL::ComPtr;
 namespace RandomMesh
 {
 	// Renders the current FPS value in the bottom right corner of the screen using Direct2D and DirectWrite.
-	class SampleFpsTextRenderer
+	class BackhroundRenderer
 	{
 	public:
-		SampleFpsTextRenderer(const shared_ptr<DX::DeviceResources>& deviceResources);
+		BackhroundRenderer(const shared_ptr<DX::DeviceResources>& deviceResources);
 		void CreateDeviceDependentResources();
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);

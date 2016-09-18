@@ -33,10 +33,10 @@ void Sample3DSceneRenderer::CreateWindowSizeDependentResources()
 
 	// This is a simple example of change that can be made when the app is in
 	// portrait or snapped view.
-	if (aspectRatio < 1.0f)
+	/*if (aspectRatio < 1.0f)
 	{
 		fovAngleY *= 2.0f;
-	}
+	}*/
 
 	// Note that the OrientationTransform3D matrix is post-multiplied here
 	// in order to correctly orient the scene to match the display orientation.
@@ -339,6 +339,7 @@ void Sample3DSceneRenderer::CreateDeviceDependentResources()
 		wireDesc.CullMode = D3D11_CULL_BACK;
 		wireDesc.DepthClipEnable = true;
 		wireDesc.DepthBias = -500;
+		wireDesc.AntialiasedLineEnable = true;
 						
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&wireDesc, &m_wireRastarizerState));
 	});
