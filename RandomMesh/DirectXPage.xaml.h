@@ -15,7 +15,7 @@ namespace RandomMesh
 	/// <summary>
 	/// A page that hosts a DirectX SwapChainPanel.
 	/// </summary>
-	public ref class DirectXPage sealed
+	public ref class DirectXPage sealed		
 	{
 	public:
 		DirectXPage();
@@ -23,6 +23,8 @@ namespace RandomMesh
 
 		void SaveInternalState(Windows::Foundation::Collections::IPropertySet^ state);
 		void LoadInternalState(Windows::Foundation::Collections::IPropertySet^ state);
+
+		void UpdateBusyPanel();
 
 	private:
 		// XAML low-level rendering event handler.
@@ -53,7 +55,30 @@ namespace RandomMesh
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 		std::unique_ptr<RandomMeshMain> m_main; 
 		bool m_windowVisible;
-		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);		
+	};
+
+	private struct EventsBridge
+		: IRandomMeshEvents
+	{
+	private:
+		DirectXPage^ m_page;
+
+	public:
+		EventsBridge(DirectXPage^ page)
+		{
+			m_page = page;
+		}
+
+		virtual void MeshGenerating(bool isGenerating)
+		{
+			if(m_page == nullptr)
+			{
+				return;
+			}
+
+			m_page->UpdateBusyPanel();
+		}		
 	};
 }
 

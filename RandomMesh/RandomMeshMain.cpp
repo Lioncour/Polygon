@@ -9,8 +9,12 @@ using namespace Windows::System::Threading;
 using namespace Concurrency;
 
 // Loads and initializes application assets when the application is loaded.
-RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
-	m_deviceResources(deviceResources), m_pointerLocationX(0.0f)
+RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources)
+	:
+	m_deviceResources(deviceResources),
+	m_pointerLocationX(0.0f),
+	m_isGenerating(false),
+	m_eventsHandler(nullptr)
 {
 	// Register to be notified if the Device is lost or recreated
 	m_deviceResources->RegisterDeviceNotify(this);
@@ -26,7 +30,7 @@ RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& devic
 	m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	*/
 
-	NewMesh();
+	GenerateNewMesh();
 }
 
 RandomMeshMain::~RandomMeshMain()
@@ -142,15 +146,37 @@ void RandomMeshMain::OnDeviceRestored()
 	CreateWindowSizeDependentResources();	
 }
 
-void RandomMesh::RandomMeshMain::NewMesh()
+void RandomMeshMain::SetIsGenerating(bool isGenerating)
 {
+	m_isGenerating = isGenerating;;
+
+	auto handler = m_eventsHandler;
+	if (handler != nullptr)
+	{
+		handler->MeshGenerating(m_isGenerating);
+	}
+}
+
+void RandomMesh::RandomMeshMain::GenerateNewMesh()
+{
+	SetIsGenerating(true);
+
 	auto meshLoader = ref new WorkItemHandler([this](IAsyncAction ^ action)
 	{
-		auto vertexCount = static_cast<size_t>(Random(10, 50));
-		auto mesh = make_unique<RandomMesh::Mesh>(vertexCount);
+		try
+		{
+			auto vertexCount = static_cast<size_t>(Random(10, 50));
+			auto mesh = make_unique<RandomMesh::Mesh>(vertexCount);
 
-		critical_section::scoped_lock lock(m_criticalSection);
-		m_sceneRenderer->SetMesh(std::move(mesh));
+			critical_section::scoped_lock lock(m_criticalSection);
+			m_sceneRenderer->SetMesh(std::move(mesh));
+
+			SetIsGenerating(false);
+		}
+		catch(...)
+		{
+			SetIsGenerating(false);
+		}
 	});
 
 	ThreadPool::RunAsync(meshLoader, WorkItemPriority::Normal, WorkItemOptions::None);

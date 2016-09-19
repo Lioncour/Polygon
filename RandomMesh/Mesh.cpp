@@ -430,7 +430,7 @@ namespace RandomMesh
 		}
 
 		vector<bool> isSameTriangle(triList.size(), false);
-		for (int i = 0; i < triList.size(); i++)
+		for (size_t i = 0; i < triList.size(); i++)
 		{
 			for (int j = i + 1; j < triList.size(); j++)
 			{

@@ -82,11 +82,17 @@ DirectXPage::DirectXPage():
 
 	m_main = std::unique_ptr<RandomMeshMain>(new RandomMeshMain(m_deviceResources));
 	m_main->StartRenderLoop();
+
+	auto bridge = new EventsBridge(this);
+	m_main->RegisterEventsHandler(bridge);
+
+	UpdateBusyPanel();
 }
 
 DirectXPage::~DirectXPage()
 {
 	// Stop rendering and processing events on destruction.
+	m_main->RegisterEventsHandler(nullptr);
 	m_main->StopRenderLoop();
 	m_coreInput->Dispatcher->StopProcessEvents();
 }
@@ -188,8 +194,17 @@ void DirectXPage::OnSwapChainPanelSizeChanged(Object^ sender, SizeChangedEventAr
 	m_main->CreateWindowSizeDependentResources();
 }
 
-
 void RandomMesh::DirectXPage::Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
 {
-	m_main->NewMesh();
+	m_main->GenerateNewMesh();
+}
+
+void RandomMesh::DirectXPage::UpdateBusyPanel()
+{
+	Dispatcher->RunAsync(Windows::UI::Core::CoreDispatcherPriority::Normal, ref new Windows::UI::Core::DispatchedHandler([this]()
+	{
+		viewBusyPanel->Visibility = m_main->GetIsGenerating()
+			? Windows::UI::Xaml::Visibility::Visible
+			: Windows::UI::Xaml::Visibility::Collapsed;
+	}));
 }
