@@ -48,5 +48,7 @@ namespace RandomMesh
 		// Track current input pointer position.
 		float m_pointerLocationX;
 		float m_pointerLocationY;
+	public:
+		void NewMesh();
 	};
 }

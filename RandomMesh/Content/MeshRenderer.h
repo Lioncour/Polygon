@@ -3,6 +3,7 @@
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
+#include "Mesh.h"
 
 namespace RandomMesh
 {
@@ -19,8 +20,8 @@ namespace RandomMesh
 		void StartTracking(float x, float y);
 		void TrackingUpdate(float x, float y);
 		void StopTracking();
-		bool IsTracking() { return m_tracking; }
-
+		bool IsTracking() { return m_tracking; }		
+		void SetMesh(unique_ptr<Mesh> mesh);
 
 	private:
 		void Rotate(float rotationX, float rotationY);
@@ -28,6 +29,8 @@ namespace RandomMesh
 	private:
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
+
+		unique_ptr<Mesh> m_mesh;
 
 		// Direct3D resources for cube geometry.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_inputLayout;
@@ -42,7 +45,7 @@ namespace RandomMesh
 
 		// System resources for cube geometry.
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
-		uint32	m_indexCount;
+		uint32_t	m_indexCount;
 
 		// Variables used with the rendering loop.
 		bool	m_loadingComplete;
@@ -55,7 +58,7 @@ namespace RandomMesh
 		float	m_baseTrackingY;
 		
 		float	m_rotationX;
-		float	m_rotationY;
+		float	m_rotationY;		
 	};
 }
 

@@ -9,7 +9,23 @@
 
     <SwapChainPanel x:Name="swapChainPanel">
         <Grid>
-            <RelativePanel x:Name="viewBusyPanel" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Row="1" Grid.Column="1" Content="NEW" Foreground="White" BorderBrush="White" HorizontalAlignment="Stretch" Margin="0,4" Click="Button_Click"/>
+
+            <Button Grid.Row="2" Grid.Column="1" Content="Save STL" Foreground="White" BorderBrush="White" HorizontalAlignment="Stretch" Margin="0,4,0,12"/>
+
+            <RelativePanel x:Name="viewBusyPanel" Grid.RowSpan="3" Grid.ColumnSpan="3"  Visibility="Collapsed">
                 <Border Background="{ThemeResource ApplicationForegroundThemeBrush}" Opacity="0.5" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True"/>
                 <ProgressRing x:Name="viewProgressRing"  IsActive="True" RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.AlignVerticalCenterWithPanel="True" />
                 <TextBlock Text="Generating..." Foreground="White"  RelativePanel.AlignHorizontalCenterWithPanel="True" RelativePanel.Below="{Binding ElementName=viewProgressRing}" Margin="0,12,0,0" Style="{StaticResource BaseTextBlockStyle}" />

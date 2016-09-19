@@ -53,6 +53,7 @@ namespace RandomMesh
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 		std::unique_ptr<RandomMeshMain> m_main; 
 		bool m_windowVisible;
+		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 }
 

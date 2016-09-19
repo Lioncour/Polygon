@@ -56,6 +56,8 @@ namespace RandomMesh
 
 	Mesh::Mesh(size_t vertexNum)
 	{
+		_light = XMFLOAT3(Random(-1.0, 1.0), Random(-1.0, 1.0), Random(-1.0, 1.0));
+
 		auto vertexes = vector<VertexDummy>();
 		vertexes.reserve(vertexNum);
 
@@ -99,12 +101,12 @@ namespace RandomMesh
 		}
 	}
 
-	std::vector<VertexPositionColor> Mesh::GetVertices()
+	std::vector<VertexPositionColor> Mesh::GetVertices() const
 	{
 		return _gradientVertexes;
 	}
 
-	vector<uint16_t> Mesh::GetIndices()
+	vector<uint16_t> Mesh::GetIndices() const
 	{
 		return _triangleIndices;
 	}

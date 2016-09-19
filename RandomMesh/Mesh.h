@@ -433,11 +433,13 @@ namespace RandomMesh
 		vector<VertexPositionColor> _gradientVertexes;
 		vector<VertexPositionColor> _solidVertexes;
 		vector<uint16_t> _triangleIndices;
+		XMFLOAT3 _light;
 
 	public:
 		Mesh(size_t vertexNum);
-		vector<VertexPositionColor> GetVertices();
-		vector<uint16_t> GetIndices();
+		vector<VertexPositionColor> GetVertices() const;
+		vector<uint16_t> GetIndices() const;
+		XMFLOAT3 GetLight() { return _light; }
 
 	private:
 		void Delaunay(const vector<VertexDummy>& seq, vector<Triangle>& triangles, vector<Line>& surfaceEdges);

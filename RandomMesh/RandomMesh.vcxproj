@@ -225,6 +225,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="DirectXHelper.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="RandomMeshMain.cpp" />
     <ClCompile Include="DirectXPage.xaml.cpp">

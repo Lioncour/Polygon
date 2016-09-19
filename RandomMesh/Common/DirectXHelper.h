@@ -40,6 +40,14 @@ namespace DX
 		return floorf(dips * dpi / dipsPerInch + 0.5f); // Round to nearest integer.
 	}
 
+	void CreateBuffer(_In_ ID3D11Device* device, size_t bufferSize, D3D11_BIND_FLAG bindFlag, _Out_ ID3D11Buffer** pBuffer);
+
+	template<typename T>
+	inline size_t SizeOfBuffer(size_t records)
+	{
+		return sizeof(T) * records;
+	}
+
 #if defined(_DEBUG)
 	// Check for SDK Layer support.
 	inline bool SdkLayersAvailable()

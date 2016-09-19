@@ -68,6 +68,9 @@
     <ClCompile Include="Content\MeshRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="DirectXHelper.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />

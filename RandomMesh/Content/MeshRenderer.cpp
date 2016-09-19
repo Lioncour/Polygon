@@ -8,6 +8,9 @@ using namespace RandomMesh;
 using namespace DirectX;
 using namespace Windows::Foundation;
 
+const int cVertexBufferSize = UINT16_MAX / 2;
+const int cIndexBufferSize = UINT16_MAX;
+
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
@@ -67,6 +70,8 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 	static const XMVECTORF32 up = { 0.0f, 1.0f, 0.0f, 0.0f };
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+
+	Rotate(0, 0);
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -129,11 +134,46 @@ void MeshRenderer::StopTracking()
 	m_tracking = false;
 }
 
+void MeshRenderer::SetMesh(unique_ptr<Mesh> mesh)
+{
+	if (m_loadingComplete == false)
+	{
+		m_mesh = std::move(mesh);
+		return;
+	}
+
+	m_constantBufferData.light = mesh->GetLight();
+
+	auto vertices = mesh->GetVertices();
+	auto indices = mesh->GetIndices();
+
+	D3D11_MAPPED_SUBRESOURCE vertexResource = { 0 };
+	D3D11_MAPPED_SUBRESOURCE indexResource = { 0 };
+
+	auto context = m_deviceResources->GetD3DDeviceContext();
+
+	DX::ThrowIfFailed(context->Map(m_vertexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &vertexResource));
+	DX::ThrowIfFailed(context->Map(m_indexBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &indexResource));
+
+	memcpy_s(vertexResource.pData, vertexResource.RowPitch, vertices.data(), DX::SizeOfBuffer<VertexPositionColor>(vertices.size()));
+	memcpy_s(indexResource.pData, indexResource.RowPitch, indices.data(), DX::SizeOfBuffer<uint16_t>(indices.size()));
+
+	m_indexCount = indices.size();
+
+	context->Unmap(m_vertexBuffer.Get(), 0);
+	context->Unmap(m_indexBuffer.Get(), 0);
+}
+
 // Renders one frame using the vertex and pixel shaders.
 void MeshRenderer::Render()
 {
 	// Loading is asynchronous. Only draw geometry after it's loaded.
 	if (!m_loadingComplete)
+	{
+		return;
+	}
+
+	if (m_indexCount == 0)
 	{
 		return;
 	}
@@ -290,42 +330,12 @@ void MeshRenderer::CreateDeviceDependentResources()
 
 
 	// Once both shaders are loaded, create the mesh.
-	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] () {
+	auto createCubeTask = (createPSTask && createVSTask && createBlackPSTask).then([this] ()
+	{
+		DX::CreateBuffer(m_deviceResources->GetD3DDevice(), DX::SizeOfBuffer<VertexPositionColor>(cVertexBufferSize), D3D11_BIND_VERTEX_BUFFER, &m_vertexBuffer);
+		DX::CreateBuffer(m_deviceResources->GetD3DDevice(), DX::SizeOfBuffer<uint16_t>(cIndexBufferSize), D3D11_BIND_INDEX_BUFFER, &m_indexBuffer);
 
-		RandomMesh::Mesh mesh(static_cast<size_t>(Random(10, 50)));
-
-		m_constantBufferData.light = XMFLOAT3(Random(-1.0, 1.0), Random(-1.0, 1.0), Random(-1.0, 1.0));
-
-		auto vertices = mesh.GetVertices();
-		auto indices = mesh.GetIndices();
-
-		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-		vertexBufferData.pSysMem = vertices.data();
-		vertexBufferData.SysMemPitch = 0;
-		vertexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(VertexPositionColor) * vertices.size(), D3D11_BIND_VERTEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateBuffer(
-				&vertexBufferDesc,
-				&vertexBufferData,
-				&m_vertexBuffer
-				)
-			);
-
-		m_indexCount = indices.size();
-
-		D3D11_SUBRESOURCE_DATA indexBufferData = {0};
-		indexBufferData.pSysMem = indices.data();
-		indexBufferData.SysMemPitch = 0;
-		indexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(uint16_t) * indices.size(), D3D11_BIND_INDEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_deviceResources->GetD3DDevice()->CreateBuffer(
-				&indexBufferDesc,
-				&indexBufferData,
-				&m_indexBuffer
-				)
-			);
+		m_indexCount = 0;
 
 		D3D11_RASTERIZER_DESC desc = {};
 		desc.FillMode = D3D11_FILL_SOLID;
@@ -346,6 +356,11 @@ void MeshRenderer::CreateDeviceDependentResources()
 	// Once the cube is loaded, the object is ready to be rendered.
 	createCubeTask.then([this] () {
 		m_loadingComplete = true;
+
+		if (m_mesh)
+		{
+			SetMesh(std::move(m_mesh));
+		}
 	});
 }
 

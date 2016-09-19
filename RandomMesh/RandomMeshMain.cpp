@@ -25,6 +25,8 @@ RandomMeshMain::RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& devic
 	m_timer.SetFixedTimeStep(true);
 	m_timer.SetTargetElapsedSeconds(1.0 / 60);
 	*/
+
+	NewMesh();
 }
 
 RandomMeshMain::~RandomMeshMain()
@@ -137,5 +139,19 @@ void RandomMeshMain::OnDeviceRestored()
 	m_sceneRenderer->CreateDeviceDependentResources();
 	m_backgroundRenderer->CreateDeviceDependentResources();
 
-	CreateWindowSizeDependentResources();
+	CreateWindowSizeDependentResources();	
+}
+
+void RandomMesh::RandomMeshMain::NewMesh()
+{
+	auto meshLoader = ref new WorkItemHandler([this](IAsyncAction ^ action)
+	{
+		auto vertexCount = static_cast<size_t>(Random(10, 50));
+		auto mesh = make_unique<RandomMesh::Mesh>(vertexCount);
+
+		critical_section::scoped_lock lock(m_criticalSection);
+		m_sceneRenderer->SetMesh(std::move(mesh));
+	});
+
+	ThreadPool::RunAsync(meshLoader, WorkItemPriority::Normal, WorkItemOptions::None);
 }
