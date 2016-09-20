@@ -19,10 +19,12 @@ namespace RandomMesh
 				throw ref new Platform::InvalidArgumentException();
 			}
 
+			dataWriter->ByteOrder = Streams::ByteOrder::LittleEndian;
+
 			auto vertices = mesh->GetVertices();
 			auto indices = mesh->GetIndices();
 
-			uint32_t trianglesCount = 1;//indices.size() / 3;
+			uint32_t trianglesCount = indices.size() / 3;
 
 			WriteHeader(dataWriter, trianglesCount);
 
@@ -32,22 +34,32 @@ namespace RandomMesh
 				auto b = vertices[indices[index + 1]];
 				auto c = vertices[indices[index + 2]];
 
-				AddTriangle(dataWriter, a, b, c);
-
-				break;
+				AddTriangle(dataWriter, c, b, a);
 			}
 		}
 
 	private:
 		static void WriteHeader(Streams::DataWriter^ dataWriter, uint32_t trianglesCount)
 		{
-			dataWriter->WriteByte(0x46);
-			dataWriter->WriteByte(0x49);
-			dataWriter->WriteByte(0x47);
-			dataWriter->WriteByte(0x55);
-			dataWriter->WriteByte(0x52);
-			dataWriter->WriteByte(0x45);
-			
+			byte bytes[] = { 0x46, 0x49, 0x47, 0x55, 0x52, 0x45 };
+
+			auto count = 80;
+			for (auto letter : bytes)
+			{
+				dataWriter->WriteByte(letter);
+
+				count--;
+				if (count == 1)
+				{
+					break;
+				}
+			}
+
+			for (; count > 0; count--)
+			{
+				dataWriter->WriteByte(0x00);
+			}
+
 			dataWriter->WriteUInt32(trianglesCount);
 		}
 
