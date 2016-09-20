@@ -23,7 +23,7 @@
 
             <Button Grid.Row="1" Grid.Column="1" Content="NEW" Foreground="White" BorderBrush="White" HorizontalAlignment="Stretch" Margin="0,4" Click="Button_Click"/>
 
-            <Button Grid.Row="2" Grid.Column="1" Content="Save STL" Foreground="White" BorderBrush="White" HorizontalAlignment="Stretch" Margin="0,4,0,12"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="Save STL" Foreground="White" BorderBrush="White" HorizontalAlignment="Stretch" Margin="0,4,0,12" Click="SaveAsStlClick"/>
 
             <RelativePanel x:Name="viewBusyPanel" Grid.RowSpan="3" Grid.ColumnSpan="3"  Visibility="Collapsed">
                 <Border Background="{ThemeResource ApplicationForegroundThemeBrush}" Opacity="0.5" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True"/>

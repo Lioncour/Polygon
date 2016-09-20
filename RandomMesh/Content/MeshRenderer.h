@@ -21,7 +21,7 @@ namespace RandomMesh
 		void TrackingUpdate(float x, float y);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }		
-		void SetMesh(unique_ptr<Mesh> mesh);
+		void SetMesh(shared_ptr<Mesh> mesh);
 
 	private:
 		void Rotate(float rotationX, float rotationY);
@@ -30,7 +30,7 @@ namespace RandomMesh
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
-		unique_ptr<Mesh> m_mesh;
+		shared_ptr<Mesh> m_mesh;
 
 		// Direct3D resources for cube geometry.
 		Microsoft::WRL::ComPtr<ID3D11InputLayout>	m_inputLayout;

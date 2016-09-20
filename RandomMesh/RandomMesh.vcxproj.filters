@@ -71,6 +71,9 @@
     <ClCompile Include="DirectXHelper.cpp">
       <Filter>Common</Filter>
     </ClCompile>
+    <ClCompile Include="StlWriter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.xaml.h" />
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="Content\MeshRenderer.h">
       <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="StlWriter.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

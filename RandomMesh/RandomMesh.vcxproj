@@ -219,6 +219,7 @@
     <ClInclude Include="Content\ShaderStructures.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="ScrollingBackground.h" />
+    <ClInclude Include="StlWriter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.xaml.cpp">
@@ -241,6 +242,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StlWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

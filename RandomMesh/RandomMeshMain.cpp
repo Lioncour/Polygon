@@ -166,10 +166,10 @@ void RandomMesh::RandomMeshMain::GenerateNewMesh()
 		try
 		{
 			auto vertexCount = static_cast<size_t>(Random(10, 50));
-			auto mesh = make_unique<RandomMesh::Mesh>(vertexCount);
+			m_mesh = make_shared<RandomMesh::Mesh>(vertexCount);
 
 			critical_section::scoped_lock lock(m_criticalSection);
-			m_sceneRenderer->SetMesh(std::move(mesh));
+			m_sceneRenderer->SetMesh(m_mesh);
 
 			SetIsGenerating(false);
 		}

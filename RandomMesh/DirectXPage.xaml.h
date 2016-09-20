@@ -56,6 +56,7 @@ namespace RandomMesh
 		std::unique_ptr<RandomMeshMain> m_main; 
 		bool m_windowVisible;
 		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);		
+		void SaveAsStlClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	private struct EventsBridge

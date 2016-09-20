@@ -134,11 +134,11 @@ void MeshRenderer::StopTracking()
 	m_tracking = false;
 }
 
-void MeshRenderer::SetMesh(unique_ptr<Mesh> mesh)
+void MeshRenderer::SetMesh(shared_ptr<Mesh> mesh)
 {
 	if (m_loadingComplete == false)
 	{
-		m_mesh = std::move(mesh);
+		m_mesh = mesh;
 		return;
 	}
 
@@ -359,7 +359,8 @@ void MeshRenderer::CreateDeviceDependentResources()
 
 		if (m_mesh)
 		{
-			SetMesh(std::move(m_mesh));
+			SetMesh(m_mesh);
+			m_mesh = nullptr;
 		}
 	});
 }

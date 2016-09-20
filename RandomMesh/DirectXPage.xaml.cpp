@@ -5,6 +5,8 @@
 
 #include "pch.h"
 #include "DirectXPage.xaml.h"
+#include <ppltasks.h>
+#include "StlWriter.h"
 
 using namespace RandomMesh;
 
@@ -207,4 +209,41 @@ void RandomMesh::DirectXPage::UpdateBusyPanel()
 			? Windows::UI::Xaml::Visibility::Visible
 			: Windows::UI::Xaml::Visibility::Collapsed;
 	}));
+}
+
+
+void RandomMesh::DirectXPage::SaveAsStlClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	using namespace Windows::Storage;
+	using namespace Concurrency;
+
+	auto savePicker = ref new Pickers::FileSavePicker();
+	savePicker->SuggestedStartLocation = Pickers::PickerLocationId::DocumentsLibrary;
+	savePicker->SuggestedFileName = "My figure";
+
+	savePicker->FileTypeChoices->Insert("STL", ref new Platform::Collections::Vector<Platform::String^>(1, ".stl"));
+
+	auto task = create_task(savePicker->PickSaveFileAsync()).then([this](StorageFile^ file)
+	{
+		return file->OpenAsync(FileAccessMode::ReadWrite);
+	}).then([this](Streams::IRandomAccessStream^ stream)
+	{
+		stream->Size = 0;
+
+		auto writer = ref new Streams::DataWriter(stream->GetOutputStreamAt(0));
+		RandomMesh::StlWriter::Save(writer, m_main->GetMesh());
+
+		writer->StoreAsync();
+	}).then([](Concurrency::task<void> t)
+	{
+		try
+		{
+			t.get();
+			OutputDebugString(L"Stl saved.");
+		}
+		catch (...)
+		{
+			OutputDebugString(L"Error on STL save");
+		}
+	});;
 }

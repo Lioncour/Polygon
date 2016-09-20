@@ -36,6 +36,8 @@ namespace RandomMesh
 		bool GetIsGenerating() { return m_isGenerating; }
 		void RegisterEventsHandler(IRandomMeshEvents* handler) { m_eventsHandler = handler; }
 
+		shared_ptr<Mesh> GetMesh() { return m_mesh; }
+
 	private:
 		void ProcessInput();
 		void Update();
@@ -62,5 +64,7 @@ namespace RandomMesh
 
 		bool m_isGenerating;
 		IRandomMeshEvents* m_eventsHandler;
+
+		shared_ptr<Mesh> m_mesh;
 	};
 }
