@@ -57,8 +57,7 @@ namespace RandomMesh
 		float	m_baseTrackingX;
 		float	m_baseTrackingY;
 		
-		float	m_rotationX;
-		float	m_rotationY;		
+		XMVECTOR m_lastRotation;	
 	};
 }
 

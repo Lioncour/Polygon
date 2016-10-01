@@ -11,6 +11,15 @@ using namespace Windows::Foundation;
 const int cVertexBufferSize = UINT16_MAX / 2;
 const int cIndexBufferSize = UINT16_MAX;
 
+static void Log(const wchar_t *text, float rotationX, float rotationY, XMVECTOR eye)
+{
+#if _DEBUG
+	wchar_t buf[1024];
+	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s (%f, %f)=>(%f, %f, %f, %f)\r\n", text, rotationX, rotationY, eye.m128_f32[0], eye.m128_f32[1], eye.m128_f32[2], eye.m128_f32[3]);
+	OutputDebugString(buf);
+#endif
+}
+
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
@@ -18,10 +27,9 @@ MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceRes
 	m_indexCount(0),
 	m_tracking(false),
 	m_deviceResources(deviceResources),
-	m_rotationX(0.0),
-	m_rotationY(0.0),
 	m_baseTrackingX(0.0),
-	m_baseTrackingY(0.0)
+	m_baseTrackingY(0.0),
+	m_lastRotation(XMQuaternionRotationRollPitchYaw(0.0, 0.0, 0.0))
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
@@ -33,13 +41,6 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 	Size outputSize = m_deviceResources->GetOutputSize();
 	float aspectRatio = outputSize.Width / outputSize.Height;
 	float fovAngleY = 70.0f * XM_PI / 180.0f;
-
-	// This is a simple example of change that can be made when the app is in
-	// portrait or snapped view.
-	/*if (aspectRatio < 1.0f)
-	{
-		fovAngleY *= 2.0f;
-	}*/
 
 	// Note that the OrientationTransform3D matrix is post-multiplied here
 	// in order to correctly orient the scene to match the display orientation.
@@ -79,33 +80,17 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void MeshRenderer::Update(DX::StepTimer const& timer)
 {
-	return;
-
 	if (!m_tracking)
 	{
-		auto elapsed = timer.GetElapsedSeconds();
-
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-		m_rotationY += static_cast<float>(elapsed * radiansPerSecond);
-				
-		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
+		auto elapsed = timer.GetElapsedSeconds();
+		
+		auto rotationY = static_cast<float>(elapsed * radiansPerSecond);
+		rotationY = static_cast<float>(fmod(rotationY, XM_2PI));
 
-		Rotate(m_rotationX, m_rotationY);
+		Rotate(0.0, rotationY);
 	}
 }
-
-static void Log(const wchar_t *text, float rotationX, float rotationY, XMVECTOR eye)
-{
-#if _DEBUG
-	wchar_t buf[1024];
-	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s (%f, %f)=>(%f, %f, %f, %f)\r\n", text, rotationX, rotationY, eye.m128_f32[0], eye.m128_f32[1], eye.m128_f32[2], eye.m128_f32[3]);
-	OutputDebugString(buf);
-#endif
-}
-
-float m_lastX = -100000000;
-float m_lastY = -100000000;
-XMVECTOR m_lastRotation = XMQuaternionRotationRollPitchYaw(0.0, 0.0, 0.0);
 
 // Rotate the 3D cube model a set amount of radians.
 void MeshRenderer::Rotate(float rotationX, float rotationY)
@@ -115,15 +100,6 @@ void MeshRenderer::Rotate(float rotationX, float rotationY)
 	{
 		return;
 	}
-
-	/*if (abs(m_lastX - rotationX) < 0.00001
-		&& abs(m_lastY - rotationY) < 0.00001)
-	{
-		return;
-	}*/
-
-	m_lastX = rotationX;
-	m_lastY = rotationY;
 	
 	auto rotation = XMQuaternionNormalize(XMQuaternionRotationRollPitchYaw(rotationX, rotationY, 0.0));
 	Log(L"ROTATION", rotationX, rotationY, rotation);
@@ -132,8 +108,6 @@ void MeshRenderer::Rotate(float rotationX, float rotationY)
 	Log(L"RES ROT", rotationX, rotationY, m_lastRotation);
 
 	auto matrix = XMMatrixRotationQuaternion(m_lastRotation);
-
-	//auto rotation = XMMatrixRotationRollPitchYaw(rotationX, rotationY, 0.0);
 	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(matrix));
 }
 
@@ -154,13 +128,13 @@ void MeshRenderer::TrackingUpdate(float x, float y)
 
 		auto size = fmin(m_deviceResources->GetOutputSize().Height, m_deviceResources->GetOutputSize().Width);
 
-		m_rotationX = XM_2PI * 2.0f * deltaY / size;
-		m_rotationY = XM_2PI * 2.0f * deltaX / size;
+		auto rotationX = XM_2PI * deltaY / size;
+		auto rotationY = XM_2PI * deltaX / size;
 
-		m_rotationX = static_cast<float>(fmod(m_rotationX, XM_2PI));
-		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
+		rotationX = static_cast<float>(fmod(rotationX, XM_2PI));
+		rotationY = static_cast<float>(fmod(rotationY, XM_2PI));
 
-		Rotate(m_rotationX, m_rotationY);
+		Rotate(rotationX, rotationY);
 
 		m_baseTrackingX = x;
 		m_baseTrackingY = y;
