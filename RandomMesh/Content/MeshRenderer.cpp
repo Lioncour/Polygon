@@ -11,15 +11,16 @@ using namespace Windows::Foundation;
 const int cVertexBufferSize = UINT16_MAX / 2;
 const int cIndexBufferSize = UINT16_MAX;
 
-static void Log(const wchar_t *text, float rotationX, float rotationY, XMVECTOR eye)
-{
+static void Log(const wchar_t *text, float rotationX, float rotationY, float rotationZ, XMVECTOR eye)
+{	
 #if _DEBUG
 	wchar_t buf[1024];
-	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s (%f, %f)=>(%f, %f, %f, %f)\r\n", text, rotationX, rotationY, eye.m128_f32[0], eye.m128_f32[1], eye.m128_f32[2], eye.m128_f32[3]);
+	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s (%f, %f, %f)=>(%f, %f, %f, %f)\r\n", text, rotationX, rotationY, rotationZ, eye.m128_f32[0], eye.m128_f32[1], eye.m128_f32[2], eye.m128_f32[3]);
 	OutputDebugString(buf);
 #endif
 }
 
+//#pragma optimize("", off)
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
@@ -29,11 +30,13 @@ MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceRes
 	m_deviceResources(deviceResources),
 	m_baseTrackingX(0.0),
 	m_baseTrackingY(0.0),
+	m_scale(1.0),
 	m_lastRotation(XMQuaternionRotationRollPitchYaw(0.0, 0.0, 0.0))
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
+//#pragma optimize("", on)
 
 // Initializes view parameters when the window size changes.
 void MeshRenderer::CreateWindowSizeDependentResources()
@@ -80,6 +83,8 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void MeshRenderer::Update(DX::StepTimer const& timer)
 {
+	return;
+
 	if (!m_tracking)
 	{
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
@@ -88,38 +93,38 @@ void MeshRenderer::Update(DX::StepTimer const& timer)
 		auto rotationY = static_cast<float>(elapsed * radiansPerSecond);
 		rotationY = static_cast<float>(fmod(rotationY, XM_2PI));
 
-		Rotate(0.0, rotationY);
+		Transform(0.0, rotationY, 0.0, m_scale);
 	}
 }
 
 // Rotate the 3D cube model a set amount of radians.
-void MeshRenderer::Rotate(float rotationX, float rotationY)
+void MeshRenderer::Transform(float rotationX, float rotationY, float rotationZ, float scale)
 {
-	if (abs(rotationX) < 0.000001
-		&& abs(rotationY) < 0.000001)
+	if (abs(rotationX) > 0.000001
+		|| abs(rotationY) > 0.000001)
 	{
-		return;
+		auto rotation = XMQuaternionNormalize(XMQuaternionRotationRollPitchYaw(rotationX, rotationY, rotationZ));
+		m_lastRotation = XMQuaternionNormalize(XMQuaternionMultiply(m_lastRotation, rotation));
+
+		Log(L"Rotation Q", rotationX, rotationY, rotationZ, m_lastRotation);
 	}
-	
-	auto rotation = XMQuaternionNormalize(XMQuaternionRotationRollPitchYaw(rotationX, rotationY, 0.0));
-	Log(L"ROTATION", rotationX, rotationY, rotation);
 
-	m_lastRotation = XMQuaternionNormalize(XMQuaternionMultiply(m_lastRotation, rotation));
-	Log(L"RES ROT", rotationX, rotationY, m_lastRotation);
+	auto rotationMatrix = XMMatrixRotationQuaternion(m_lastRotation);
+	auto scaleMatrix = XMMatrixScaling(scale, scale, scale);
 
-	auto matrix = XMMatrixRotationQuaternion(m_lastRotation);
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(matrix));
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(rotationMatrix * scaleMatrix));
 }
 
 void MeshRenderer::StartTracking(float x, float y)
 {
-	m_tracking = true;
+	m_tracking = true;	
+
 	m_baseTrackingX = x;
 	m_baseTrackingY = y;
 }
 
 // When tracking, the 3D cube can be rotated around its Y axis by tracking pointer position relative to the output screen width.
-void MeshRenderer::TrackingUpdate(float x, float y)
+void RandomMesh::MeshRenderer::TrackingUpdate(float x, float y, float zAngle, float scale)
 {
 	if (m_tracking)
 	{
@@ -130,11 +135,17 @@ void MeshRenderer::TrackingUpdate(float x, float y)
 
 		auto rotationX = XM_2PI * deltaY / size;
 		auto rotationY = XM_2PI * deltaX / size;
+		auto rotationZ = XMConvertToRadians(zAngle);
 
 		rotationX = static_cast<float>(fmod(rotationX, XM_2PI));
 		rotationY = static_cast<float>(fmod(rotationY, XM_2PI));
+		rotationZ = static_cast<float>(fmod(rotationZ, XM_2PI));
 
-		Rotate(rotationX, rotationY);
+		m_scale *= scale;
+		m_scale = fmin(m_scale, 2.0f);
+		m_scale = fmax(m_scale, 0.5f);
+
+		Transform(rotationX, rotationY, rotationZ, m_scale);
 
 		m_baseTrackingX = x;
 		m_baseTrackingY = y;

@@ -7,8 +7,7 @@
 
 namespace RandomMesh
 {
-	// This sample renderer instantiates a basic rendering pipeline.
-	class MeshRenderer
+	__declspec(align(16)) class MeshRenderer
 	{
 	public:
 		MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
@@ -18,15 +17,27 @@ namespace RandomMesh
 		void Update(DX::StepTimer const& timer);
 		void Render();
 		void StartTracking(float x, float y);
-		void TrackingUpdate(float x, float y);
+		void TrackingUpdate(float x, float y, float zAngle, float scale);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }		
 		void SetMesh(shared_ptr<Mesh> mesh);
 
-	private:
-		void Rotate(float rotationX, float rotationY);
+		void* operator new(size_t request)
+		{
+			return _aligned_malloc(request, 16);
+		}
+
+		void operator delete(void * ptr)
+		{
+			_aligned_free(ptr);
+		}
 
 	private:
+		void Transform(float rotationX, float rotationY, float rotationZ, float scale);
+
+	private:
+		__declspec(align(16)) XMVECTOR m_lastRotation;
+
 		// Cached pointer to device resources.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
@@ -57,7 +68,7 @@ namespace RandomMesh
 		float	m_baseTrackingX;
 		float	m_baseTrackingY;
 		
-		XMVECTOR m_lastRotation;	
+		float	m_scale;		
 	};
 }
 

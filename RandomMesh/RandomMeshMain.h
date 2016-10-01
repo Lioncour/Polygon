@@ -20,10 +20,18 @@ namespace RandomMesh
 		RandomMeshMain(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		~RandomMeshMain();
 		void CreateWindowSizeDependentResources();
+
 		void StartTracking(float x, float y) { m_pointerLocationX = x; m_pointerLocationY = y; m_sceneRenderer->StartTracking(x, y); }
-		void TrackingUpdate(float x, float y) { m_pointerLocationX = x; m_pointerLocationY = y; }
+		void TrackingUpdate(float x, float y, float zAngle, float scale)
+		{
+			m_pointerLocationX = x; m_pointerLocationY = y; m_zAngle = zAngle, m_scale = scale; 
+
+			Concurrency::critical_section::scoped_lock lock(m_criticalSection);
+			m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY, m_zAngle, m_scale);
+		}
 		void StopTracking() { m_sceneRenderer->StopTracking(); }
 		bool IsTracking() { return m_sceneRenderer->IsTracking(); }
+
 		void StartRenderLoop();
 		void StopRenderLoop();
 		Concurrency::critical_section& GetCriticalSection() { return m_criticalSection; }
@@ -60,7 +68,9 @@ namespace RandomMesh
 
 		// Track current input pointer position.
 		float m_pointerLocationX;
-		float m_pointerLocationY;			
+		float m_pointerLocationY;
+		float m_zAngle;
+		float m_scale;
 
 		bool m_isGenerating;
 		IRandomMeshEvents* m_eventsHandler;

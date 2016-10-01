@@ -94,7 +94,7 @@ void RandomMeshMain::Update()
 void RandomMeshMain::ProcessInput()
 {
 	// TODO: Add per frame input handling here.
-	m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY);
+	//m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY, m_zAngle, m_scale);
 }
 
 bool RandomMeshMain::Render() 

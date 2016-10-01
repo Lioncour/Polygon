@@ -74,6 +74,24 @@ DirectXPage::DirectXPage():
 		m_coreInput->PointerPressed += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerPressed);
 		m_coreInput->PointerMoved += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerMoved);
 		m_coreInput->PointerReleased += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerReleased);
+		m_coreInput->PointerExited += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerExited);
+		m_coreInput->PointerWheelChanged += ref new TypedEventHandler<Object^, PointerEventArgs^>(this, &DirectXPage::OnPointerWheelChanged);
+
+		//Create a gesture recognizer to handle manipulation events and configure it for translation and rotation
+		m_gestureRecognizer = ref new Windows::UI::Input::GestureRecognizer();
+
+		m_gestureRecognizer->GestureSettings =
+			Windows::UI::Input::GestureSettings::ManipulationTranslateX
+			| Windows::UI::Input::GestureSettings::ManipulationTranslateY
+			| Windows::UI::Input::GestureSettings::ManipulationRotate
+			| Windows::UI::Input::GestureSettings::ManipulationScale;
+
+		m_gestureRecognizer->ManipulationStarted +=
+			ref new TypedEventHandler<GestureRecognizer^, ManipulationStartedEventArgs^>(this, &DirectXPage::OnManipulationStarted);
+		m_gestureRecognizer->ManipulationUpdated +=
+			ref new TypedEventHandler<GestureRecognizer^, ManipulationUpdatedEventArgs^>(this, &DirectXPage::OnManipulationUpdated);
+		m_gestureRecognizer->ManipulationCompleted +=
+			ref new TypedEventHandler<GestureRecognizer^, ManipulationCompletedEventArgs^>(this, &DirectXPage::OnManipulationCompleted);
 
 		// Begin processing input messages as they're delivered.
 		m_coreInput->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessUntilQuit);
@@ -163,22 +181,69 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
 
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
-	// When the pointer is pressed begin tracking the pointer movement.
-	m_main->StartTracking(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
+	//m_main->StartTracking(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
+	
+	m_gestureRecognizer->ProcessDownEvent(e->CurrentPoint);
 }
 
 void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 {
-	// Update the pointer tracking code.
-	if (m_main->IsTracking())
+	/*if (m_main->IsTracking())
 	{
 		m_main->TrackingUpdate(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
-	}
+	}*/
+
+	IVector<PointerPoint^>^ pointerPoints = PointerPoint::GetIntermediatePoints(e->CurrentPoint->PointerId);
+	m_gestureRecognizer->ProcessMoveEvents(pointerPoints);
 }
 
 void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 {
-	// Stop tracking pointer movement when the pointer is released.
+	//m_main->StopTracking();
+	m_gestureRecognizer->ProcessUpEvent(e->CurrentPoint);
+}
+
+void DirectXPage::OnPointerExited(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ args)
+{
+	//m_main->StopTracking();
+	m_gestureRecognizer->ProcessUpEvent(args->CurrentPoint);
+}
+
+void DirectXPage::OnPointerWheelChanged(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ args)
+{
+	m_gestureRecognizer->ProcessMouseWheelEvent(args->CurrentPoint, false, true);
+}
+
+static void Log(const wchar_t *text, ManipulationDelta delta)
+{
+#if _DEBUG
+	wchar_t buf[1024];
+	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s Tran:(%f, %f), Exp:%f, Rot:%f, Scale:%f\r\n", text, delta.Translation.X, delta.Translation.Y, delta.Expansion, delta.Rotation, delta.Scale);
+	OutputDebugString(buf);
+#endif
+}
+
+void DirectXPage::OnManipulationStarted(Windows::UI::Input::GestureRecognizer ^ sender, Windows::UI::Input::ManipulationStartedEventArgs ^ args)
+{	
+	auto delta = args->Cumulative;
+	Log(L"MS", delta);
+
+	m_main->StartTracking(delta.Translation.X, delta.Translation.Y);
+}
+
+void DirectXPage::OnManipulationUpdated(Windows::UI::Input::GestureRecognizer ^ sender, Windows::UI::Input::ManipulationUpdatedEventArgs ^ args)
+{
+	auto delta = args->Cumulative;	
+	Log(L"MU", delta);
+
+	m_main->TrackingUpdate(delta.Translation.X, delta.Translation.Y, delta.Rotation, delta.Scale);
+}
+
+void DirectXPage::OnManipulationCompleted(Windows::UI::Input::GestureRecognizer ^ sender, Windows::UI::Input::ManipulationCompletedEventArgs ^ args)
+{
+	auto cum = args->Cumulative;
+	Log(L"MC", cum);
+
 	m_main->StopTracking();
 }
 

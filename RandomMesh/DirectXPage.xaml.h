@@ -15,7 +15,7 @@ namespace RandomMesh
 	/// <summary>
 	/// A page that hosts a DirectX SwapChainPanel.
 	/// </summary>
-	public ref class DirectXPage sealed		
+	public ref class DirectXPage sealed
 	{
 	public:
 		DirectXPage();
@@ -45,17 +45,26 @@ namespace RandomMesh
 		// Track our independent input on a background worker thread.
 		Windows::Foundation::IAsyncAction^ m_inputLoopWorker;
 		Windows::UI::Core::CoreIndependentInputSource^ m_coreInput;
+		Windows::UI::Input::GestureRecognizer^ m_gestureRecognizer;
 
 		// Independent input handling functions.
 		void OnPointerPressed(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 		void OnPointerMoved(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
 		void OnPointerReleased(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ e);
+		void OnPointerExited(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ args);
+		void OnPointerWheelChanged(Platform::Object^ sender, Windows::UI::Core::PointerEventArgs^ args);
+
+		// Gesture recognizer event handlers
+		void OnManipulationStarted(Windows::UI::Input::GestureRecognizer^ sender, Windows::UI::Input::ManipulationStartedEventArgs^ args);
+		void OnManipulationUpdated(Windows::UI::Input::GestureRecognizer^ sender, Windows::UI::Input::ManipulationUpdatedEventArgs^ args);
+		//void OnManipulationInertiaStarting(Windows::UI::Input::GestureRecognizer^ sender, Windows::UI::Input::ManipulationInertiaStartingEventArgs^ args);
+		void OnManipulationCompleted(Windows::UI::Input::GestureRecognizer^ sender, Windows::UI::Input::ManipulationCompletedEventArgs^ args);
 
 		// Resources used to render the DirectX content in the XAML page background.
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
-		std::unique_ptr<RandomMeshMain> m_main; 
+		std::unique_ptr<RandomMeshMain> m_main;
 		bool m_windowVisible;
-		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);		
+		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void SaveAsStlClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
@@ -73,13 +82,13 @@ namespace RandomMesh
 
 		virtual void MeshGenerating(bool isGenerating)
 		{
-			if(m_page == nullptr)
+			if (m_page == nullptr)
 			{
 				return;
 			}
 
 			m_page->UpdateBusyPanel();
-		}		
+		}
 	};
 }
 
