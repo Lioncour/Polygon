@@ -83,8 +83,6 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 // Called once per frame, rotates the cube and calculates the model and view matrices.
 void MeshRenderer::Update(DX::StepTimer const& timer)
 {
-	return;
-
 	if (!m_tracking)
 	{
 		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);

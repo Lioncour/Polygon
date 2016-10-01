@@ -181,26 +181,19 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
 
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
-	//m_main->StartTracking(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
-	
+	m_main->StartTracking(0.0, 0.0);	
 	m_gestureRecognizer->ProcessDownEvent(e->CurrentPoint);
 }
 
 void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 {
-	/*if (m_main->IsTracking())
-	{
-		m_main->TrackingUpdate(e->CurrentPoint->Position.X, e->CurrentPoint->Position.Y);
-	}*/
-
 	IVector<PointerPoint^>^ pointerPoints = PointerPoint::GetIntermediatePoints(e->CurrentPoint->PointerId);
 	m_gestureRecognizer->ProcessMoveEvents(pointerPoints);
 }
 
 void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 {
-	//m_main->StopTracking();
-	m_gestureRecognizer->ProcessUpEvent(e->CurrentPoint);
+	m_gestureRecognizer->ProcessUpEvent(e->CurrentPoint);	
 }
 
 void DirectXPage::OnPointerExited(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ args)
