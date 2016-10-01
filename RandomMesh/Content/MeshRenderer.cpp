@@ -71,7 +71,9 @@ void MeshRenderer::CreateWindowSizeDependentResources()
 
 	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 
-	Rotate(0, 0);
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixIdentity()));
+
+	//Rotate(0, 0);
 }
 
 // Called once per frame, rotates the cube and calculates the model and view matrices.
@@ -92,11 +94,47 @@ void MeshRenderer::Update(DX::StepTimer const& timer)
 	}
 }
 
+static void Log(const wchar_t *text, float rotationX, float rotationY, XMVECTOR eye)
+{
+#if _DEBUG
+	wchar_t buf[1024];
+	_snwprintf_s(buf, 1024, _TRUNCATE, L"%s (%f, %f)=>(%f, %f, %f, %f)\r\n", text, rotationX, rotationY, eye.m128_f32[0], eye.m128_f32[1], eye.m128_f32[2], eye.m128_f32[3]);
+	OutputDebugString(buf);
+#endif
+}
+
+float m_lastX = -100000000;
+float m_lastY = -100000000;
+XMVECTOR m_lastRotation = XMQuaternionRotationRollPitchYaw(0.0, 0.0, 0.0);
+
 // Rotate the 3D cube model a set amount of radians.
 void MeshRenderer::Rotate(float rotationX, float rotationY)
 {
-	// Prepare to pass the updated model matrix to the shader
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationX(rotationX) * XMMatrixRotationY(rotationY)));
+	if (abs(rotationX) < 0.000001
+		&& abs(rotationY) < 0.000001)
+	{
+		return;
+	}
+
+	/*if (abs(m_lastX - rotationX) < 0.00001
+		&& abs(m_lastY - rotationY) < 0.00001)
+	{
+		return;
+	}*/
+
+	m_lastX = rotationX;
+	m_lastY = rotationY;
+	
+	auto rotation = XMQuaternionNormalize(XMQuaternionRotationRollPitchYaw(rotationX, rotationY, 0.0));
+	Log(L"ROTATION", rotationX, rotationY, rotation);
+
+	m_lastRotation = XMQuaternionNormalize(XMQuaternionMultiply(m_lastRotation, rotation));
+	Log(L"RES ROT", rotationX, rotationY, m_lastRotation);
+
+	auto matrix = XMMatrixRotationQuaternion(m_lastRotation);
+
+	//auto rotation = XMMatrixRotationRollPitchYaw(rotationX, rotationY, 0.0);
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(matrix));
 }
 
 void MeshRenderer::StartTracking(float x, float y)
@@ -116,8 +154,8 @@ void MeshRenderer::TrackingUpdate(float x, float y)
 
 		auto size = fmin(m_deviceResources->GetOutputSize().Height, m_deviceResources->GetOutputSize().Width);
 
-		m_rotationX += XM_2PI * 2.0f * deltaY / size;
-		m_rotationY += XM_2PI * 2.0f * deltaX / size;
+		m_rotationX = XM_2PI * 2.0f * deltaY / size;
+		m_rotationY = XM_2PI * 2.0f * deltaX / size;
 
 		m_rotationX = static_cast<float>(fmod(m_rotationX, XM_2PI));
 		m_rotationY = static_cast<float>(fmod(m_rotationY, XM_2PI));
