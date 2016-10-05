@@ -412,7 +412,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 
 	// Create a depth stencil view for use with 3D rendering if needed.
 	CD3D11_TEXTURE2D_DESC1 depthStencilDesc(
-		DXGI_FORMAT_D32_FLOAT, 
+		DXGI_FORMAT_D24_UNORM_S8_UINT,
 		lround(m_d3dRenderTargetSize.Width),
 		lround(m_d3dRenderTargetSize.Height),
 		1, // This depth stencil view has only one texture.
@@ -443,8 +443,7 @@ void DX::DeviceResources::CreateWindowSizeDependentResources()
 		0.0f,
 		0.0f,
 		m_d3dRenderTargetSize.Width,
-		m_d3dRenderTargetSize.Height
-		);
+		m_d3dRenderTargetSize.Height);
 
 	m_d3dContext->RSSetViewports(1, &m_screenViewport);
 

@@ -16,7 +16,7 @@ namespace RandomMesh
 		void ReleaseDeviceDependentResources();
 		void Update(DX::StepTimer const& timer);
 		void Render();
-		void StartTracking(float x, float y);
+		void StartTracking(float x, float y, float zAngle, float scale);
 		void TrackingUpdate(float x, float y, float zAngle, float scale);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }		
@@ -67,7 +67,9 @@ namespace RandomMesh
 		
 		float	m_baseTrackingX;
 		float	m_baseTrackingY;
-		
+		float	m_baseZAngle;
+		float	m_baseScale;
+
 		float	m_scale;		
 	};
 }

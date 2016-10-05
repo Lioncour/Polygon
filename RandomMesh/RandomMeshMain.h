@@ -21,10 +21,22 @@ namespace RandomMesh
 		~RandomMeshMain();
 		void CreateWindowSizeDependentResources();
 
-		void StartTracking(float x, float y) { m_pointerLocationX = x; m_pointerLocationY = y; m_sceneRenderer->StartTracking(x, y); }
+		void StartTracking(float x, float y, float zAngle, float scale)
+		{
+			m_pointerLocationX = x; 
+			m_pointerLocationY = y; 
+			m_zAngle = zAngle,
+			m_scale = scale;
+
+			m_sceneRenderer->StartTracking(x, y, m_zAngle, m_scale);
+		}
+
 		void TrackingUpdate(float x, float y, float zAngle, float scale)
 		{
-			m_pointerLocationX = x; m_pointerLocationY = y; m_zAngle = zAngle, m_scale = scale; 
+			m_pointerLocationX = x;
+			m_pointerLocationY = y;
+			m_zAngle = zAngle,
+			m_scale = scale;
 
 			Concurrency::critical_section::scoped_lock lock(m_criticalSection);
 			m_sceneRenderer->TrackingUpdate(m_pointerLocationX, m_pointerLocationY, m_zAngle, m_scale);

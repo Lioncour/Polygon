@@ -181,7 +181,7 @@ void DirectXPage::OnDisplayContentsInvalidated(DisplayInformation^ sender, Objec
 
 void DirectXPage::OnPointerPressed(Object^ sender, PointerEventArgs^ e)
 {
-	m_main->StartTracking(0.0, 0.0);	
+	m_main->StartTracking(0.0, 0.0, 0.0, 1.0);
 	m_gestureRecognizer->ProcessDownEvent(e->CurrentPoint);
 }
 
@@ -221,7 +221,7 @@ void DirectXPage::OnManipulationStarted(Windows::UI::Input::GestureRecognizer ^ 
 	auto delta = args->Cumulative;
 	Log(L"MS", delta);
 
-	m_main->StartTracking(delta.Translation.X, delta.Translation.Y);
+	m_main->StartTracking(delta.Translation.X, delta.Translation.Y, delta.Rotation, delta.Scale);
 }
 
 void DirectXPage::OnManipulationUpdated(Windows::UI::Input::GestureRecognizer ^ sender, Windows::UI::Input::ManipulationUpdatedEventArgs ^ args)
