@@ -193,13 +193,14 @@ void DirectXPage::OnPointerMoved(Object^ sender, PointerEventArgs^ e)
 
 void DirectXPage::OnPointerReleased(Object^ sender, PointerEventArgs^ e)
 {
-	m_gestureRecognizer->ProcessUpEvent(e->CurrentPoint);	
+	m_gestureRecognizer->ProcessUpEvent(e->CurrentPoint);
+	m_main->StopTracking();
 }
 
 void DirectXPage::OnPointerExited(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ args)
 {
-	//m_main->StopTracking();
 	m_gestureRecognizer->ProcessUpEvent(args->CurrentPoint);
+	m_main->StopTracking();
 }
 
 void DirectXPage::OnPointerWheelChanged(Platform::Object ^ sender, Windows::UI::Core::PointerEventArgs ^ args)
