@@ -66,6 +66,11 @@ namespace RandomMesh
 		bool m_windowVisible;
 		void Button_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 		void SaveAsStlClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void WhiteBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void GrayBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void BlackBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void ImageBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
+		void HyperlinkButton_Click(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e);
 	};
 
 	private struct EventsBridge

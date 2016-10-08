@@ -58,6 +58,9 @@ namespace RandomMesh
 
 		shared_ptr<Mesh> GetMesh() { return m_mesh; }
 
+		void SetBackgroundColor(float r, float g, float b, float a);
+		void ResetBackground();
+
 	private:
 		void ProcessInput();
 		void Update();
@@ -88,5 +91,7 @@ namespace RandomMesh
 		IRandomMeshEvents* m_eventsHandler;
 
 		shared_ptr<Mesh> m_mesh;
+
+		shared_ptr<XMVECTORF32> m_backgroundColor;
 	};
 }

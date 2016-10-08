@@ -90,6 +90,17 @@ void RandomMeshMain::Update()
 	});
 }
 
+void RandomMesh::RandomMeshMain::SetBackgroundColor(float r, float g, float b, float a)
+{
+	XMVECTORF32 color = { r, g, b, a };
+	m_backgroundColor = make_shared<XMVECTORF32>(color);
+}
+
+void RandomMesh::RandomMeshMain::ResetBackground()
+{
+	m_backgroundColor.reset();
+}
+
 // Process all input from the user before updating game state
 void RandomMeshMain::ProcessInput()
 {
@@ -115,12 +126,22 @@ bool RandomMeshMain::Render()
 	ID3D11RenderTargetView *const targets[1] = { m_deviceResources->GetBackBufferRenderTargetView() };
 	context->OMSetRenderTargets(1, targets, m_deviceResources->GetDepthStencilView());
 
+	auto color = DirectX::Colors::Black;
+	auto customColor = (bool)m_backgroundColor;
+	if (customColor)
+	{
+		color = *m_backgroundColor;
+	}
+	
 	// Clear the back buffer and depth stencil view.
-	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), DirectX::Colors::CornflowerBlue);
+	context->ClearRenderTargetView(m_deviceResources->GetBackBufferRenderTargetView(), color);
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	// Render background
-	m_backgroundRenderer->Render();
+	if (!customColor)
+	{
+		m_backgroundRenderer->Render();
+	}
 
 	// Render mesh
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);

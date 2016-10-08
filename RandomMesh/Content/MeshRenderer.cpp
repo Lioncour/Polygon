@@ -24,7 +24,7 @@ static void Log(const wchar_t *text, float rotationX, float rotationY, float rot
 // Loads vertex and pixel shaders from files and instantiates the cube geometry.
 MeshRenderer::MeshRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
-	m_degreesPerSecond(45),
+	m_degreesPerSecond(30),
 	m_indexCount(0),
 	m_tracking(false),
 	m_deviceResources(deviceResources),

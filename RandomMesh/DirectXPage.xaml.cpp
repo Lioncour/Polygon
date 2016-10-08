@@ -32,6 +32,12 @@ DirectXPage::DirectXPage():
 {
 	InitializeComponent();
 
+	if (Windows::Foundation::Metadata::ApiInformation::IsTypePresent("Windows.UI.ViewManagement.StatusBar"))
+	{
+		auto statusbar = Windows::UI::ViewManagement::StatusBar::GetForCurrentView();
+		statusbar->HideAsync();
+	}
+
 	// Register event handlers for page lifecycle.
 	CoreWindow^ window = Window::Current->CoreWindow;
 
@@ -305,4 +311,29 @@ void RandomMesh::DirectXPage::SaveAsStlClick(Platform::Object^ sender, Windows::
 			OutputDebugString(L"Error on STL save");
 		}
 	});;
+}
+
+
+void RandomMesh::DirectXPage::WhiteBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	m_main->SetBackgroundColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TogglePaneButton->IsChecked = false;
+}
+
+void RandomMesh::DirectXPage::GrayBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	m_main->SetBackgroundColor(0.75f, 0.75f, 0.75f, 0.75f);
+	TogglePaneButton->IsChecked = false;
+}
+
+void RandomMesh::DirectXPage::BlackBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	m_main->SetBackgroundColor(0.0f, 0.0f, 0.0f, 1.0f);
+	TogglePaneButton->IsChecked = false;
+}
+
+void RandomMesh::DirectXPage::ImageBackgroundClick(Platform::Object^ sender, Windows::UI::Xaml::RoutedEventArgs^ e)
+{
+	m_main->ResetBackground();
+	TogglePaneButton->IsChecked = false;
 }
