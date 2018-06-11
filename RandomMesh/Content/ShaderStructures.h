@@ -21,8 +21,10 @@ namespace RandomMesh
 
 	struct BackgroundConstantBuffer
 	{
-		float bias;
+		float x;
+		float y;
 		float ratio;
+		float zoom;
 	};
 
 	struct BackgroundVertex

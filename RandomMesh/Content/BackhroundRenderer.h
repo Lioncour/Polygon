@@ -25,6 +25,9 @@ namespace RandomMesh
 		void Render();
 
 	private:
+		void UpdateSpeedData(const float& speed, float& targetSpeed, float& acceleration);
+		void UpdateZoomData(const float& zoom, float& targetZoom, float& acceleration);
+
 		shared_ptr<DX::DeviceResources> m_deviceResources;
 		
 		CD3D11_TEXTURE2D_DESC catDesc;
@@ -46,5 +49,17 @@ namespace RandomMesh
 
 		float m_backgroundWidth;
 		float m_backgroundHeight;
+
+		float m_targetSpeedX;
+		float m_speedX;
+		float m_accelerationX;
+
+		float m_targetSpeedY;
+		float m_speedY;
+		float m_accelerationY;
+
+		float m_targetZoom;
+		float m_zoom;
+		float m_accelerationZoom;
 	};
 }

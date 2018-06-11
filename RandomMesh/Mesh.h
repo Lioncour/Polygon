@@ -12,6 +12,8 @@ namespace RandomMesh
 
 	float Random(float minValue, float maxValue);
 
+	float Sign(float value);
+
 	bool Equals(const XMFLOAT3& first, const XMFLOAT3& second);
 
 	bool static operator== (const XMFLOAT3& first, const XMFLOAT3& second)

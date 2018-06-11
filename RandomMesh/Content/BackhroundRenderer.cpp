@@ -6,22 +6,93 @@
 using namespace RandomMesh;
 using namespace Microsoft::WRL;
 
+const float cMinSpeed = 1.0f / 20.0f;
+const float cMaxSpeed = 1.0f / 5.0f;
+const float cSpeedDif = cMaxSpeed - cMinSpeed;
+
+const float cMinZoom = 0.7f;
+const float cMaxZoom = 1.3f;
+const float cZoomDif = cMaxZoom - cMinZoom;
+
+// It's a magic :)
+const float cMinAcceleration = cSpeedDif / 15.0f;
+const float cMaxAcceleration = cSpeedDif / 5.0f;
+
+const float cMinZoomAcceleration = cZoomDif / 15.0f;
+const float cMaxZoomAcceleration = cZoomDif / 5.0f;
+
 BackhroundRenderer::BackhroundRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources),
-	m_loadingComplete(false)	
+	m_loadingComplete(false)
 {
 	CreateDeviceDependentResources();
 
-	m_constantBufferData.bias = 0;
+	m_constantBufferData.x = 0;
+	m_constantBufferData.y = 0;
 	m_constantBufferData.ratio = 1;
+
+	m_targetSpeedX = Sign(Random(-1, 1)) * Random(cMinSpeed, cMaxSpeed);
+	m_speedX = -Sign(m_targetSpeedX) * Random(cMinSpeed, cMaxSpeed);
+	m_accelerationX = -Sign(m_speedX) * Random(cMinAcceleration, cMaxAcceleration);
+
+	m_targetSpeedY = Sign(Random(-1, 1)) * Random(cMinSpeed, cMaxSpeed);
+	m_speedY = -Sign(m_targetSpeedY) * Random(cMinSpeed, cMaxSpeed);
+	m_accelerationY = -Sign(m_speedY) * Random(cMinAcceleration, cMaxAcceleration);
+
+	m_targetZoom = Random(cMinZoom, cMaxZoom);
+	m_zoom = 1.0;
+	m_accelerationZoom = Sign(m_targetZoom - m_zoom) * Random(cMinZoomAcceleration, cMaxZoomAcceleration);
 }
 
 void BackhroundRenderer::Update(DX::StepTimer const& timer)
 {
 	auto time = timer.GetElapsedSeconds();
 
-	m_constantBufferData.bias += time / 5;
-	m_constantBufferData.bias = fmod(m_constantBufferData.bias, 2.0f);
+	m_speedX += m_accelerationX * time;
+	UpdateSpeedData(m_speedX, m_targetSpeedX, m_accelerationX);
+
+	m_speedY += m_accelerationY * time;
+	UpdateSpeedData(m_speedY, m_targetSpeedY, m_accelerationY);
+
+	m_zoom += m_accelerationZoom * time;
+	UpdateZoomData(m_zoom, m_targetZoom, m_accelerationZoom);
+
+	m_constantBufferData.x += time * m_speedX;
+	m_constantBufferData.x = fmod(m_constantBufferData.x, 2.0f);
+
+	m_constantBufferData.y += time * m_speedY;
+	m_constantBufferData.y = fmod(m_constantBufferData.y, 2.0f);
+
+	m_constantBufferData.zoom = m_zoom;
+}
+
+void BackhroundRenderer::UpdateSpeedData(const float& speed, float& targetSpeed, float& acceleration)
+{
+	bool isFinished = targetSpeed >= 0 && speed > targetSpeed;
+	isFinished |= (targetSpeed <= 0 && speed < targetSpeed);
+
+	if (!isFinished)
+	{
+		return;
+	}
+
+	targetSpeed = -Sign(targetSpeed) * Random(cMinSpeed, cMaxSpeed);
+	acceleration = -Sign(acceleration) * Random(cMinAcceleration, cMaxAcceleration);
+}
+
+void BackhroundRenderer::UpdateZoomData(const float& zoom, float& targetZoom, float& acceleration)
+{
+	if (targetZoom >= 1.0 && zoom >= targetZoom) {
+		targetZoom = Random(cMinZoom, 1.0f);
+		acceleration = -Random(cMinZoomAcceleration, cMaxZoomAcceleration);
+		return;
+	}
+
+	if (targetZoom <= 1.0f && zoom < targetZoom) {
+		targetZoom = Random(1.0f, cMaxZoom);
+		acceleration = Random(cMinZoomAcceleration, cMaxZoomAcceleration);
+		return;
+	}
 }
 
 void BackhroundRenderer::Render()
@@ -32,9 +103,8 @@ void BackhroundRenderer::Render()
 	}
 
 	auto context = m_deviceResources->GetD3DDeviceContext();
-
 	auto outputSize = m_deviceResources->GetOutputSize();
-	
+
 	auto backgroundRatio = m_backgroundWidth / m_backgroundHeight;
 	auto resultWidth = outputSize.Height * backgroundRatio;
 	auto texRatio = outputSize.Width / resultWidth;
@@ -179,13 +249,13 @@ void BackhroundRenderer::CreateDeviceDependentResources()
 		desc.FillMode = D3D11_FILL_SOLID;
 		desc.CullMode = D3D11_CULL_BACK;
 		desc.DepthClipEnable = true;
-		
+
 		DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRasterizerState(&desc, &m_rastarizerState));
 	});
 
 	ComPtr<ID3D11Resource> resource;
 	DX::ThrowIfFailed(DirectX::CreateWICTextureFromFile(m_deviceResources->GetD3DDevice(), L"Assets\\background.png", resource.GetAddressOf(), m_backgroundTexture.ReleaseAndGetAddressOf()));
-	
+
 	ComPtr<ID3D11Texture2D> cat;
 	DX::ThrowIfFailed(resource.As(&cat));
 
@@ -199,7 +269,7 @@ void BackhroundRenderer::CreateDeviceDependentResources()
 
 	sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
 	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
 	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
 	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 	sampDesc.MinLOD = 0;
@@ -228,7 +298,7 @@ void BackhroundRenderer::ReleaseDeviceDependentResources()
 	m_rastarizerState.Reset();
 
 	m_backgroundSampler.Reset();
-	m_backgroundTexture.Reset();	
+	m_backgroundTexture.Reset();
 
 	m_backgroundTexture.Reset();
 

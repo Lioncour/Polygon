@@ -19,8 +19,16 @@ namespace RandomMesh
 	float Random(float minValue, float maxValue)
 	{
 		auto value = Windows::Security::Cryptography::CryptographicBuffer::GenerateRandomNumber();
-
 		return minValue + (float)value / (numeric_limits<unsigned int>::max)() * (maxValue - minValue);
+	}
+
+	float Sign(float value)
+	{
+		if (value >= 0) {
+			return 1;
+		}
+
+		return -1;
 	}
 
 	bool Equals(const XMFLOAT3& first, const XMFLOAT3& second)

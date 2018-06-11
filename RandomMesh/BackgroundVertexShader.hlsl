@@ -1,7 +1,9 @@
 cbuffer ModelViewProjectionConstantBuffer : register(b0)
 {
-	float bias;
+	float x;
+	float y;
 	float ratio;
+	float zoom;
 };
 
 struct VertexShaderInput
@@ -23,7 +25,8 @@ PixelShaderInput main(VertexShaderInput input)
 	float4 pos = float4(input.pos, 1.0f);
 
 	output.pos = pos;
-	output.tex = float2((input.tex.x * ratio) + bias, input.tex.y);
+	float2 tex = float2((input.tex.x * ratio) + x, input.tex.y + y);
+	output.tex = tex * zoom;
 	
 	return output;
 }
